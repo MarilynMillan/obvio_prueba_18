@@ -1,0 +1,329 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-25 00:00+0000\n"
+"PO-Revision-Date: 2026-01-25 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_project__type_project
+msgid "Project type"
+msgstr "Projekttyp"
+
+#. module: obvio
+#: model:ir.model,name:obvio.model_type_project
+msgid "Project type"
+msgstr "Projekttyp"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_project__partner_operator_id
+msgid "Operator"
+msgstr "Bediener"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_project__create_equipment
+msgid "Create equipment"
+msgstr "Gerät erstellen"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_project__zona_id
+msgid "Country"
+msgstr "Land"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_project__ubication_id
+msgid "Location"
+msgstr "Ort"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_project__tienda_id
+msgid "Store"
+msgstr "Geschäft"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_project__template_project_id
+msgid "Project template"
+msgstr "Projektvorlage"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_project__is_template
+msgid "Is template"
+msgstr "Ist Vorlage"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_project__name_copy
+msgid "Short name"
+msgstr "Kurzname"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_project__priority
+msgid "priority"
+msgstr "Priorität"
+
+
+#. module: obvio
+#: model:ir.model.fields.selection,name:obvio.selection__project_project__priority__0
+msgid "very low"
+msgstr "Niedrig"
+
+
+#. module: obvio
+#: model:ir.model.fields.selection,name:obvio.selection__project_project__priority__1
+msgid "Low"
+msgstr "Sehr hoch"
+
+
+#. module: obvio
+#: model:ir.model.fields.selection,name:obvio.selection__project_project__priority__2
+msgid "High"
+msgstr "Hoch"
+
+
+#. module: obvio
+#: model:ir.model.fields.selection,name:obvio.selection__project_project__priority__3
+msgid "Very High"
+msgstr "Sehr hoch"
+
+#. module: obvio
+#: model_terms:ir.ui.view,arch_db:obvio.view_project_form_inherit
+msgid "Crear equipo de Mantenimiento"
+msgstr "Wartungsteam erstellen" 
+
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_res_partner__customer_is
+msgid "Customer"
+msgstr "Kunde"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_res_partner__alias_name
+msgid "Short name"
+msgstr "Kurzname"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_res_partner__is_operator
+msgid "Operator"
+msgstr "Bediener"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_res_partner__codigo_operator
+msgid "Operator code"
+msgstr "Bedienercode"
+
+#. module: obvio
+#: model:ir.model,name:obvio.model_project_zone
+msgid "Project country"
+msgstr "Projektland"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_zone__zone_ubication_ids
+msgid "Location"
+msgstr "Ort"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_zone__country_id
+msgid "Country"
+msgstr "Land"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_zone__code
+msgid "ISO code"
+msgstr "ISO-Code"
+
+#. module: obvio
+#: model:ir.model,name:obvio.model_zone_ubication
+msgid "Project location"
+msgstr "Projektstandort"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_zone_ubication__name
+#: model:ir.model.fields,field_description:obvio.field_zone_tienda__name
+msgid "Name"
+msgstr "Name"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_zone_ubication__zone
+#: model:ir.model.fields,field_description:obvio.field_zone_tienda__tienda
+msgid "Code"
+msgstr "Code"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_zone_ubication__zone_id
+msgid "Country"
+msgstr "Land"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_zone_ubication__zone_tienda_ids
+msgid "Stores"
+msgstr "Geschäfte"
+
+#. module: obvio
+#: model:ir.model,name:obvio.model_zone_tienda
+msgid "Project store"
+msgstr "Projektgeschäft"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_zone_tienda__ubication_id
+msgid "Location"
+msgstr "Ort"
+
+#. module: obvio
+#: model:ir.model,name:obvio.model_type_project
+#: model:ir.model,name:obvio.model_equipment_type
+msgid "Project type"
+msgstr "Projekttyp"
+
+#. module: obvio
+#: model:ir.ui.menu,name:obvio.menu_project_type
+msgid "Project Type"
+msgstr "Projekttyp"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_type_project__name
+#: model:ir.model.fields,field_description:obvio.field_equipment_type__name
+msgid "Name"
+msgstr "Name"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_type_project__alias_name
+#: model:ir.model.fields,field_description:obvio.field_equipment_type__alias_name
+msgid "Alias"
+msgstr "Alias"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_type_project__user_id
+#: model:ir.model.fields,field_description:obvio.field_equipment_type__user_id
+msgid "Responsible"
+msgstr "Verantwortlicher"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_type_project__company_id
+#: model:ir.model.fields,field_description:obvio.field_equipment_type__company_id
+msgid "Company"
+msgstr "Unternehmen"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_type_project__note
+#: model:ir.model.fields,field_description:obvio.field_equipment_type__note
+msgid "Comment"
+msgstr "Kommentar"
+
+#. module: obvio
+#: model_terms:ir.ui.view,arch_db:obvio.view_equipment_type_tree
+#: model_terms:ir.ui.view,arch_db:obvio.view_equipment_type_form
+#: model:ir.actions.act_window,name:obvio.action_equipment_type
+msgid "Equipment Type"
+msgstr "Gerätetyp"
+
+#. module: obvio
+#: model:ir.menu.menu,name:obvio.menu_equipment_type
+msgid "Equipment Type"
+msgstr "Gerätetyp"
+
+#. module: obvio
+#: model_terms:ir.ui.view,arch_db:obvio.view_equipment_type_form
+msgid "Project Type"
+msgstr "Projekttyp"
+
+#. module: obvio
+#: model_terms:ir.ui.view,arch_db:obvio.view_equipment_type_form
+msgid "name ...."
+msgstr "Name ...."
+
+#. module: obvio
+#: model_terms:ir.actions.act_window,help:obvio.action_equipment_type
+msgid "Manage equipment types"
+msgstr "Gerätetypen verwalten"
+
+#. module: obvio
+#: model_terms:ir.ui.view,arch_db:obvio.view_type_project_tree
+#: model_terms:ir.ui.view,arch_db:obvio.view_type_project_form
+#: model:ir.actions.act_window,name:obvio.action_type_project
+msgid "Project Type"
+msgstr "Projekttyp"
+
+#. module: obvio
+#: model_terms:ir.ui.view,arch_db:obvio.view_type_project_form
+msgid "Project Type"
+msgstr "Projekttyp"
+
+#. module: obvio
+#: model_terms:ir.ui.view,arch_db:obvio.view_type_project_form
+msgid "Digital Project"
+msgstr "Digitales Projekt"
+
+#. module: obvio
+#: model_terms:ir.actions.act_window,help:obvio.action_type_project
+msgid "Manage project types"
+msgstr "Projekttypen verwalten"
+
+#. module: obvio
+#: model_terms:ir.ui.view,arch_db:obvio.view_zone_tienda_tree
+#: model_terms:ir.ui.view,arch_db:obvio.view_zone_tienda_form
+msgid "Project Shop"
+msgstr "Projektgeschäft"
+
+#. module: obvio
+#: model:ir.actions.act_window,name:obvio.action_zone_tienda
+msgid "Stores"
+msgstr "Geschäfte"
+
+#. module: obvio
+#: model:ir.ui.menu,name:obvio.menu_zone_tienda
+msgid "Stores"
+msgstr "Geschäfte"
+
+#. module: obvio
+#: model_terms:ir.actions.act_window,help:obvio.action_zone_tienda
+msgid "Manage the project stores"
+msgstr "Projektgeschäfte verwalten"
+
+#. module: obvio
+#: model_terms:ir.ui.view,arch_db:obvio.view_zone_ubication_tree
+#: model_terms:ir.ui.view,arch_db:obvio.view_zone_ubication_form
+#: model:ir.actions.act_window,name:obvio.action_zone_ubication
+msgid "Location"
+msgstr "Ort"
+
+#. module: obvio
+#: model:ir.ui.menu,name:obvio.menu_zone_ubication
+msgid "Location"
+msgstr "Ort"
+
+#. module: obvio
+#: model_terms:ir.actions.act_window,help:obvio.action_zone_ubication
+msgid "Manage the project location"
+msgstr "Projektstandort verwalten"
+
+#. module: obvio
+#: model_terms:ir.ui.view,arch_db:obvio.view_project_zone_tree
+#: model_terms:ir.ui.view,arch_db:obvio.view_project_zone_form
+msgid "Country of the Project"
+msgstr "Projektland"
+
+#. module: obvio
+#: model:ir.actions.act_window,name:obvio.action_project_zone
+msgid "Country"
+msgstr "Land"
+
+#. module: obvio
+#: model:ir.ui.menu,name:obvio.menu_project_zones
+msgid "Country"
+msgstr "Land"
+
+#. module: obvio
+#: model_terms:ir.actions.act_window,help:obvio.action_project_zone
+msgid "Manages the project country."
+msgstr "Verwaltet die Projektländer."
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_res_partner_bank__pdf_attachment
+msgid "Attach bank PDF"
+msgstr "Bank-PDF anhängen"

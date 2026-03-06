@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_order_form_inherit_custom_cols" model="ir.ui.view">
+    <field name="name">sale.order.form.inherit.custom.cols</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_order_form"/>
+    <field name="arch" type="xml">
+
+      <!-- =========================================================
+           1) Bloque principal: debajo de Quotation Template (fuera de pestañas)
+           ========================================================= -->
+      <xpath expr="//field[@name='sale_order_template_id'][not(ancestor::page)][1]" position="after">
+        <field name="project_id" readonly="locked"/>
+        <field name="currency_id" readonly="1"/>
+      </xpath>
+
+      <!-- =========================================================
+           2) Columnas extra en líneas (list/tree)
+           Inserta después de 'name' (columna Description/Product)
+           ========================================================= -->
+      <xpath expr="//field[@name='order_line']/*[self::list or self::tree]/field[@name='name']" position="after">
+        <field name="market_id"/>
+        <field name="location_id" domain="[('zone_id', '=', market_id)]"/>
+        <field name="operator_id" domain="[('is_operator', '=', True)]"/>
+        <field name="store_id" domain="[('ubication_id', '=', location_id)]"/>
+        <field name="brand_id"/>
+      </xpath>
+
+      <!-- =========================================================
+           3) Campos de agrupación manual en list (antes de price_unit / price_subtotal)
+           ========================================================= -->
+      <xpath expr="//field[@name='order_line']/*[self::list or self::tree]/field[@name='price_unit']" position="before">
+        <field name="unit_group_id"
+               optional="show"
+               context="{'default_order_id': parent.id, 'default_group_type': 'unit'}"/>
+      </xpath>
+
+      <xpath expr="//field[@name='order_line']/*[self::list or self::tree]/field[@name='price_subtotal']" position="before">
+        <field name="amount_group_id"
+               optional="show"
+               context="{'default_order_id': parent.id, 'default_group_type': 'amount'}"/>
+      </xpath>
+
+      <!-- =========================================================
+           4) Form interno de línea: mostrar group fields
+           ========================================================= -->
+      <xpath expr="//field[@name='order_line']/form//field[@name='price_unit']" position="before">
+        <field name="unit_group_id"
+               context="{'default_order_id': order_id, 'default_group_type': 'unit'}"/>
+        <field name="amount_group_id"
+               context="{'default_order_id': order_id, 'default_group_type': 'amount'}"/>
+      </xpath>
+
+
+      <xpath expr="//field[@name='order_line']/*[self::list or self::tree]/control" position="inside">
+        <button name="action_autofill_lines_from_project"
+                type="object"
+                string="Auto-fill from project"
+                class="btn btn-link px-2"
+                invisible="not parent.project_id"/>
+      </xpath>
+
+      <!-- Tree (lista) de líneas: SOLO 1 Quantity -->
+      <xpath expr="//field[@name='order_line']/list/field[@name='product_uom_qty']" position="replace">
+        <field name="product_uom_qty"
+               string="Quantity"
+               widget="float_trim"
+               class="text-end"/>
+      </xpath>
+
+      <!-- Form interno de la línea: mismo widget -->
+      <xpath expr="//field[@name='order_line']/form//field[@name='product_uom_qty']" position="attributes">
+        <attribute name="widget">float_trim</attribute>
+      </xpath>
+
+      <xpath expr="//page[@name='other_information']//field[@name='report_grids']" position="after">
+          <field name="show_tax_column"/>
+      </xpath>
+
+      <!-- Ocultar/mostrar la columna Taxes en el list -->
+      <xpath expr="//field[@name='order_line']/list//field[@name='tax_id']" position="attributes">
+        <attribute name="column_invisible">parent.show_tax_column == False</attribute>
+      </xpath>
+
+    </field>
+  </record>
+</odoo>

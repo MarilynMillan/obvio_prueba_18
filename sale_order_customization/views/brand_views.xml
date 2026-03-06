@@ -1,0 +1,43 @@
+<!-- views/brand_views.xml -->
+<odoo>
+  <record id="view_sale_brand_tree" model="ir.ui.view">
+    <field name="name">sale.brand.list</field>
+    <field name="model">sale.brand</field>
+    <field name="arch" type="xml">
+      <list>
+        <field name="name"/>
+        <field name="active"/>
+        <field name="company_id"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_sale_brand_form" model="ir.ui.view">
+    <field name="name">sale.brand.form</field>
+    <field name="model">sale.brand</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <group>
+            <field name="name"/>
+            <field name="active"/>
+            <field name="company_id"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_sale_brand" model="ir.actions.act_window">
+    <field name="name">Brands</field>
+    <field name="res_model">sale.brand</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <menuitem id="sale_order_brand_template_menu"
+    name="Brands"
+    action="action_sale_brand"
+    parent="sale.menu_sales_config"
+    groups="sale_management.group_sale_order_template"
+    sequence="11"/>
+</odoo>

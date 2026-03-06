@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+      <record id="view_account_analytic_account_list_margin" model="ir.ui.view">
+        <field name="name">account.analytic.account.list.margin</field>
+        <field name="model">account.analytic.account</field>
+        <field name="inherit_id" ref="analytic.view_account_analytic_account_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='balance']" position="after">
+                <field name="margin_percent"  decoration-success="margin_percent &gt; 0"
+           decoration-danger="margin_percent &lt; 0"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

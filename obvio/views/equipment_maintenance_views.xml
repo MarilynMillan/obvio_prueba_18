@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_maintenance_equipment_form_inherit" model="ir.ui.view">
+        <field name="name">maintenance.equipment.form.inherit</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="inherit_id" ref="maintenance.hr_equipment_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Insertamos nuevas páginas en el notebook principal -->
+
+              <xpath expr="//div[@class='oe_title']" position="after">
+                    <div style="position: absolute; top: 10px; right: 10px;">
+                        <field name="image" widget="image" class="oe_avatar" options="{'size': [100, 100]}"/>
+                    </div>
+                </xpath>
+
+         <xpath expr="//field[@name='category_id']" position="after">
+                    <field name="type_equipment"/>
+                    <field name="show_dss_tab" invisible='1'/>
+
+            </xpath> 
+
+        <xpath expr="//field[@name='category_id']" position="before">
+                    <field name="name_equipment"/>
+                    
+
+        </xpath> 
+
+
+            <!-- Usamos un xpath para buscar la pestaña 'Maintenance' -->
+            <xpath expr="//page[@name='maintenance']/group/group[@name='statistics']" position="after">
+                <!-- Agregamos el nuevo campo de zona horaria justo aquí -->
+                
+              
+              <separator string="Time Zone Settings-" invisible="not show_dss_tab"/>
+                <group>         
+                
+                    
+                        <field name="time_zome"/>
+                        <field name="make_time" widget="float_time"/>
+                        <field name="sleeping_time" widget="float_time"/>
+                        <field name="set_service" widget="boolean_toggle"/>
+
+                 </group>
+            
+            </xpath>
+
+            <xpath expr="//field[@name='department_id']" position="after">
+                    <field name="contact_person"/>
+                    <field name="product_service"/>
+                    <field name="other_service"/>
+                    <field name="project_sequence"/>
+
+            </xpath> 
+
+              <xpath expr="//field[@name='technician_user_id']" position="attributes">
+                    <attribute name="string">Project Manager</attribute>
+            </xpath>
+
+             <xpath expr="//field[@name='location']" position="attributes">
+                <attribute name="string">Endpoint location</attribute>
+            </xpath>
+
+            <xpath expr="//notebook" position="inside">
+                <!-- Nueva pestaña 1 -->
+                <page string="Player Technical Info -" invisible="not show_dss_tab">
+                        <field name="image_ids">
+                            
+                                <form >
+                                    
+                                        <group>
+                                            <field name="name"/>
+                                            <field name="information"/>
+                                            <field name="date_imagen"/>
+                                            <field name="image" widget="image" />
+                                            <field name="image_pdf"  widget="pdf_viewer"/>
+                                            <field name="image_pdf_filename" invisible="1" />
+                                            <field name="video_filename" invisible="1" />
+                                            <field name="video_file" filename="video_filename" widget="binary" />
+                                        </group>
+                                    
+                                </form> 
+                                <list >
+                                    <field name="name"/>
+                                    <field name="date_imagen" />
+                                    <field name="image" widget="image"  options="{'size': [50, 50]}"/>
+                                    <field name="image_pdf" filename="image_pdf_filename" widget="binary"/>
+                                    <field name="video_file" filename="video_filename" widget="binary" />
+                                </list>    
+                        </field>  
+                </page>
+
+                 <page string="Display Technical Info-" invisible="not show_dss_tab">
+                        <field name="technical_image_ids">
+                             <form >
+                                    <group>
+                                        <field name="name"/>
+                                        <field name="information"/>
+                                        <field name="date_imagen"/>
+                                        <field name="image" widget="image" />
+                                        <field name="image_pdf"  widget="pdf_viewer"/>
+                                        <field name="image_pdf_filename" invisible="1" />
+                                        <field name="video_filename" invisible="1" />
+                                        <field name="video_file" filename="video_filename" widget="binary" />
+                                    </group>
+                            </form>
+                            <list>
+                                <field name="name"/>
+                                <field name="date_imagen"/>
+                                <field name="image" widget="image" options="{'size': [50, 50]}"/>
+                                <field name="image_pdf" filename="image_pdf_filename" widget="binary"/>
+                                <field name="video_file" filename="video_filename" widget="binary" />
+                            </list>
+
+                        </field>
+                </page>
+
+                <page string="Remote Desktop Info-" invisible="not show_dss_tab">
+                    <group>
+                        <field name="providenci_1"/>
+                        <field name="user_id_1"/>
+                        <field name="passwords_1"  password="True"/>
+                        <field name="optional" widget="boolean_toggle"/>
+                        <field name="providenci_2"  invisible="not optional" />
+                        <field name="ide" invisible="not optional"/>
+                        <field name="passwords_2" invisible="not optional"/>
+                    </group>
+                </page>
+
+                  <page string="Monitoring Contract-" invisible="not show_dss_tab">
+                    <group string="Contract Info:">
+                        
+                            <field name="date_expiration"/>
+                            <field name="date_start"/>
+                       
+
+                    </group>
+                    <group>
+                        <field name="comando_information"/>
+                    </group>
+                </page>
+
+                <page string="Internet Conectivity-" invisible="not show_dss_tab">
+
+                    <group>
+
+                        <field name="operation_wifi"  widget="boolean_toggle"/>
+                        <field name="network" invisible="not operation_wifi"/>
+                        <field name="passwords_3" invisible="not operation_wifi"/>
+                        <field name="operation_lan"  widget="boolean_toggle"/>
+                        <field name="ip_addres" invisible="not operation_lan"/>
+                        <field name="internet_service"  widget="boolean_toggle"/>
+                        <field name="network_2" invisible="not internet_service"/>
+                        <field name="passwords_4" invisible="not internet_service"/>
+                        <field name="internet_service_obvio"  widget="boolean_toggle"/>
+                        <field name="internet_provide" invisible="not internet_service_obvio"/>
+                        <field name="plan" invisible="not internet_service_obvio"/>
+                        <field name="phone_name" invisible="not internet_service_obvio"/>
+                        <field name="login_web" invisible="not internet_service_obvio" widget="url"/>
+                        <field name="user_internet" invisible="not internet_service_obvio"/>
+                        <field name="pass_internet" invisible="not internet_service_obvio"/>
+                        <field name="router_model" invisible="not internet_service_obvio"/>
+                        <field name="user_internet_1" invisible="not internet_service_obvio"/>
+                        <field name="pass_internet_2" invisible="not internet_service_obvio"/>
+                        <field name="device_router" widget="image" invisible="not internet_service_obvio" />
+                        <field name="mode_especifique" widget="pdf_viewer" invisible="not internet_service_obvio"/>
+                        <field name="date_service_start" invisible="not internet_service_obvio"/>
+                        <field name="date_service_completo" invisible="not internet_service_obvio"/>
+                        <field name="contract" widget="pdf_viewer" invisible="not internet_service_obvio"/>
+                    </group>
+                </page>
+
+
+                <page string="Hardware Access Info-" invisible="not show_dss_tab">
+                    
+                        <field name="hardware_image_ids">
+                              <form >
+                            
+                                    <group>
+                                        <field name="name"/>
+                                        <field name="information"/>
+                                        <field name="date_imagen"/>
+                                        <field name="image" widget="image" />
+                                        <field name="image_pdf"  widget="pdf_viewer"/>
+                                        <field name="image_pdf_filename" invisible="1" />
+                                        <field name="video_filename" invisible="1" />
+                                        <field name="video_file" filename="video_filename" widget="binary" />
+                                    </group>
+                             
+                            </form>
+                            <list>
+                                <field name="name"/>
+                                <field name="date_imagen"/>
+                                <field name="image" widget="image" options="{'size': [50, 50]}"/>
+                                <field name="image_pdf" filename="image_pdf_filename" widget="binary"/>
+                                <field name="video_file" filename="video_filename" widget="binary" />
+                            </list>
+                          
+                        </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+
+     <!-- Heredar la vista de lista de equipo de mantenimiento existente -->
+        <record id="view_maintenance_equipment_tree_inherit" model="ir.ui.view">
+            <field name="name">maintenance.equipment.tree.inherit</field>
+            <field name="model">maintenance.equipment</field>
+            <field name="inherit_id" ref="maintenance.hr_equipment_view_tree"/> <!-- Reemplaza con el ID correcto de la vista tree -->
+            <field name="arch" type="xml">
+                <!-- Añadir el campo 'project_sequence' en la vista de lista -->
+                <xpath expr="//list" position="inside">
+                    <field name="project_sequence"/>
+                </xpath>
+            </field>
+        </record>
+</odoo>

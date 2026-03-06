@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_saleorder_document_inherit_custom_cols"
+              inherit_id="sale.report_saleorder_document"
+              priority="120">
+
+        <!-- =========================================================
+             A) CSS INLINE
+             ========================================================= -->
+        <xpath expr="//div[@class='page']" position="before">
+            <style type="text/css">
+                .o_obvio_so_report .obv-so-grid {
+                  width: 100% !important;
+                  border-collapse: collapse !important;
+                  border-spacing: 0 !important;
+                  table-layout: fixed !important;
+                  empty-cells: show !important;
+                  font-size: 13px !important;
+                }
+
+                /* Anchos de columnas (ajusta fino si quieres) */
+                .o_obvio_so_report .obv-so-grid col.c-market   { width: 7%;  }
+                .o_obvio_so_report .obv-so-grid col.c-location { width: 8%;  }
+                .o_obvio_so_report .obv-so-grid col.c-operator { width: 10%;  }
+                .o_obvio_so_report .obv-so-grid col.c-store    { width: 6%;  }
+                .o_obvio_so_report .obv-so-grid col.c-qty      { width: 5%;  }
+                .o_obvio_so_report .obv-so-grid col.c-desc     { width: 30%; }
+                .o_obvio_so_report .obv-so-grid col.c-brand    { width: 8%;  }
+                .o_obvio_so_report .obv-so-grid col.c-taxes    { width: 8%;  }   /* Taxes (columna que reutiliza td_priceunit) */
+                .o_obvio_so_report .obv-so-grid col.c-unit     { width: 9%;  }   /* Subtotal (columna td_taxes) */
+                .o_obvio_so_report .obv-so-grid col.c-amount   { width: 9%;  }   /* Total (columna td_subtotal) */
+
+                /* HEADER azul */
+                .o_obvio_so_report .obv-so-grid > thead > tr > th {
+                  background: #4f8cc9 !important;
+                  color: #ffffff !important;
+                  border: 1px solid #3d73a8 !important;
+                  padding: 7px 8px !important;
+                  font-weight: 700 !important;
+                  vertical-align: middle !important;
+
+                  /* evita que se monten títulos */
+                  white-space: normal !important;
+                  word-break: break-word !important;
+                  word-wrap: break-word !important;
+                }
+
+                /* BODY */
+                .o_obvio_so_report .obv-so-grid > tbody > tr > td {
+                  background: #ffffff !important;
+                  border: 1px solid #7f95ab !important;
+                  padding: 6px 8px !important;
+                  vertical-align: top !important;
+
+                  /* FIX principal overflow */
+                  white-space: normal !important;
+                  word-break: break-word !important;
+                  word-wrap: break-word !important;
+                  overflow-wrap: anywhere !important; /* en HTML ayuda mucho */
+                  hyphens: auto !important;
+                }
+
+                /* Quitar rayado gris por temas globales */
+                .o_obvio_so_report .obv-so-grid tbody tr:nth-child(odd) > td,
+                .o_obvio_so_report .obv-so-grid tbody tr:nth-child(even) > td {
+                  background: #ffffff !important;
+                }
+
+                /* Celdas con rowspan (agrupadas unit/amount) */
+                .o_obvio_so_report .obv-so-grid td[rowspan] {
+                  background: #ffffff !important;
+                  border: 1px solid #7f95ab !important;
+                  vertical-align: middle !important;
+                }
+
+                /* Descripción: siempre envolvente */
+                .o_obvio_so_report .obv-so-grid td[name='td_name'],
+                .o_obvio_so_report .obv-so-grid td[name='td_name'] span {
+                  white-space: normal !important;
+                  word-break: break-word !important;
+                  word-wrap: break-word !important;
+                  overflow-wrap: anywhere !important;
+                }
+
+                /* Numéricas en una sola línea (se ven más limpias) */
+                .o_obvio_so_report .obv-so-grid td[name='td_qty_custom'],
+                .o_obvio_so_report .obv-so-grid td[name='td_priceunit'],
+                .o_obvio_so_report .obv-so-grid td[name='td_taxes'],
+                .o_obvio_so_report .obv-so-grid td[name='td_subtotal'] {
+                  white-space: nowrap !important;
+                  text-align: right !important;
+                  vertical-align: middle !important;
+                }
+
+                /* Fuerza TODO a la izquierda (headers + celdas), aunque el QWeb tenga text-end */
+                .o_obvio_so_report .obv-so-grid thead th,
+                .o_obvio_so_report .obv-so-grid tbody td {
+                  text-align: left !important;
+                }
+
+                /* Por si Odoo mete text-end/text-center en spans internos */
+                .o_obvio_so_report .obv-so-grid .text-end,
+                .o_obvio_so_report .obv-so-grid .text-center,
+                .o_obvio_so_report .obv-so-grid .text-start {
+                  text-align: left !important;
+                }
+
+                /* Cantidades / montos: evita que “salten” y mantén alineación consistente */
+                .o_obvio_so_report .obv-so-grid td[name='td_qty_custom'],
+                .o_obvio_so_report .obv-so-grid td[name='td_priceunit'],
+                .o_obvio_so_report .obv-so-grid td[name='td_taxes'],
+                .o_obvio_so_report .obv-so-grid td[name='td_subtotal'] {
+                  text-align: left !important;
+                  white-space: nowrap; /* opcional: evita corte feo */
+                }
+
+                /* Totales estilo azul suave */
+                .o_obvio_so_report .obv-so-totals-grid {
+                  border-collapse: collapse !important;
+                  border-spacing: 0 !important;
+                  width: 100% !important;
+                }
+
+                .o_obvio_so_report .obv-so-totals-grid td {
+                  border: 1px solid #7f95ab !important;
+                  padding: 6px 10px !important;
+                  background: #ffffff !important;
+                }
+
+                .o_obvio_so_report .obv-so-totals-grid tr.o_subtotal td {
+                  background: #eef5fc !important;
+                }
+
+                .o_obvio_so_report .obv-so-totals-grid tr.o_total td {
+                  background: #dceaf8 !important;
+                  color: #2f6fae !important;
+                  font-weight: 700 !important;
+                }
+
+                /* Total in words más parecido a invoice */
+                .o_obvio_so_report .obv-amount-words-label {
+                  color: #1f2d3d !important;
+                  font-weight: 600 !important;
+                  line-height: 1.1 !important;
+                }
+
+                .o_obvio_so_report .obv-amount-words-value {
+                  color: #6c7a89 !important;
+                  font-size: 12px !important;
+                  line-height: 1.2 !important;
+                }
+            </style>
+        </xpath>
+
+        <!-- =========================================================
+             B) Clase scope en la página
+             ========================================================= -->
+        <xpath expr="//div[@class='page']" position="attributes">
+            <attribute name="class">page o_obvio_so_report</attribute>
+        </xpath>
+
+        <!-- =========================================================
+             C) Mapas agrupación manual
+             ========================================================= -->
+        <xpath expr="//t[@t-set='display_discount']" position="after">
+            <!-- OJO: aquí era el bug: estabas seteando manual_maps pero leyendo "maps" -->
+            <t t-set="maps" t-value="doc._get_manual_report_maps(lines_to_report)"/>
+            <t t-set="subtotal_map" t-value="maps.get('subtotal_map')"/>
+            <t t-set="total_map" t-value="maps.get('total_map')"/>
+        </xpath>
+
+        <!-- =========================================================
+             D) Tabla principal: clases y colgroup
+             ========================================================= -->
+        <xpath expr="//table[contains(@class,'o_main_table')]" position="attributes">
+            <attribute name="class">o_has_total_table o_main_table table table-sm obv-so-grid</attribute>
+        </xpath>
+
+        <xpath expr="//table[contains(@class,'o_main_table')]/thead" position="before">
+            <colgroup class="obv-colgroup">
+                <col class="c-market"/>
+                <col class="c-location"/>
+                <col class="c-operator"/>
+                <col class="c-store"/>
+                <col class="c-qty"/>
+                <col class="c-desc"/>
+                <col class="c-brand"/>
+                <col class="c-taxes"/>
+                <col class="c-unit"/>
+                <col class="c-amount"/>
+            </colgroup>
+        </xpath>
+
+        <!-- =========================================================
+             E) Totales: clases
+             ========================================================= -->
+        <xpath expr="//table[contains(@class,'o_total_table')]" position="attributes">
+            <attribute name="class">o_total_table table table-sm obv-so-totals-grid</attribute>
+        </xpath>
+
+        <!-- =========================================================
+             F) Headers custom antes de Description
+             ========================================================= -->
+        <xpath expr="//th[@name='th_description']" position="before">
+            <th name="th_market" class="text-start text-nowrap">Market</th>
+            <th name="th_location" class="text-start text-nowrap">Location</th>
+            <th name="th_operator" class="text-start text-nowrap">Operator</th>
+            <th name="th_store" class="text-start text-nowrap">Store</th>
+            <th name="th_qty_custom" class="text-end text-nowrap">Qty</th>
+        </xpath>
+
+        <!-- =========================================================
+             G) Valores custom antes de Description
+             ========================================================= -->
+        <xpath expr="//td[@name='td_name']" position="before">
+            <td name="td_market" class="text-start text-nowrap"
+                t-if="not line.display_type and line.product_type != 'combo'">
+                <span t-esc="line.market_id.code or ''"/>
+            </td>
+            <td name="td_location" class="text-start text-nowrap"
+                t-if="not line.display_type and line.product_type != 'combo'">
+                <span t-esc="line.location_id.display_name or ''"/>
+            </td>
+            <td name="td_operator" class="text-start text-nowrap"
+                t-if="not line.display_type and line.product_type != 'combo'">
+                <t t-set="op_full" t-value="(line.operator_id.display_name or '').strip()"/>
+                <span t-att-title="op_full" t-esc="op_full[:9]"/>
+            </td>
+            <td name="td_store" class="text-start text-nowrap"
+                t-if="not line.display_type and line.product_type != 'combo'">
+                <span t-esc="line.store_id.display_name or ''"/>
+            </td>
+            <td name="td_qty_custom" class="text-end text-nowrap"
+                t-if="not line.display_type and line.product_type != 'combo'">
+                <span t-field="line.product_uom_qty"/>
+            </td>
+        </xpath>
+
+        <!-- =========================================================
+             H) Quantity base -> Brand
+             ========================================================= -->
+        <xpath expr="//th[@name='th_quantity']" position="replace">
+            <th name="th_quantity" class="text-start text-nowrap">Brand</th>
+        </xpath>
+
+        <xpath expr="//td[@name='td_quantity']" position="replace">
+            <td name="td_quantity" class="text-start text-nowrap"
+                t-if="not line.display_type and line.product_type != 'combo'">
+                <span t-esc="line.brand_id.display_name or ''"/>
+            </td>
+        </xpath>
+
+        <!-- =========================================================
+             J) td_priceunit -> muestra Taxes (0.00 si exento)
+             (MISMO ORDEN QUE TENÍAS: Taxes | Subtotal | Total)
+             ========================================================= -->
+        <xpath expr="//td[@name='td_priceunit']" position="replace">
+            <td name="td_priceunit" class="text-end text-nowrap"
+                t-if="not line.display_type and line.product_type != 'combo'">
+                <t t-set="is_exempt"
+                   t-value="(not line.tax_id) or all((tax.amount or 0.0) == 0.0 for tax in line.tax_id)"/>
+                <t t-if="is_exempt">
+                    <span>0.00</span>
+                </t>
+                <t t-else="">
+                    <span t-out="(line.price_total - line.price_subtotal)"
+                          t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                </t>
+            </td>
+        </xpath>
+
+        <!-- =========================================================
+             K) td_taxes -> SUBTOTAL agrupado (rowspan)
+             (ANTES era unit_map/price_unit; AHORA subtotal_map/price_subtotal)
+             ========================================================= -->
+        <xpath expr="//td[@name='td_taxes']" position="replace">
+            <td name="td_taxes"
+                class="text-end text-nowrap"
+                t-if="not line.display_type
+                      and line.product_type != 'combo'
+                      and subtotal_map.get(line.id, {}).get('show', True)"
+                t-att-rowspan="subtotal_map.get(line.id, {}).get('rowspan', 1)">
+                <span t-out="doc._obvio_round_half_up(subtotal_map.get(line.id, {}).get('value', line.price_subtotal), 0)"
+                  t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+            </td>
+        </xpath>
+
+        <!-- =========================================================
+             L) td_subtotal -> TOTAL agrupado (rowspan)
+             (ANTES era amount_map; AHORA total_map y default price_total)
+             ========================================================= -->
+        <xpath expr="//td[@name='td_subtotal']" position="replace">
+            <td name="td_subtotal"
+                class="text-end o_price_total"
+                t-if="not line.display_type
+                      and line.product_type != 'combo'
+                      and not line.is_downpayment
+                      and total_map.get(line.id, {}).get('show', True)"
+                t-att-rowspan="total_map.get(line.id, {}).get('rowspan', 1)">
+
+               <span t-out="doc._obvio_round_half_up(total_map.get(line.id, {}).get('value', line.price_total), 0)"
+                     t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+            </td>
+        </xpath>
+
+        <!-- =========================================================
+         RIGHT COLUMN (address): Shipping Address
+         ========================================================= -->
+        <xpath expr="//t[@t-set='address']" position="replace">
+          <t t-set="address">
+            <strong>Shipping Address</strong>
+            <div t-field="doc.partner_shipping_id"
+                 t-options='{"widget": "contact",
+                             "fields": ["address", "name", "phone"],
+                             "no_marker": True,
+                             "phone_icons": True}'/>
+          </t>
+        </xpath>
+
+        <!-- =========================================================
+             LEFT COLUMN (information_block): Client
+             Reemplaza el bloque condicional original completo
+             ========================================================= -->
+        <xpath expr="//t[@t-set='information_block']/.." position="replace">
+          <t t-set="information_block">
+            <strong>Client</strong>
+
+            <!-- Contacto SIN teléfono (lo manejamos nosotros abajo, con fallback) -->
+            <div t-field="doc.partner_invoice_id"
+                 t-options='{"widget": "contact",
+                             "fields": ["address", "name"],
+                             "no_marker": True,
+                             "phone_icons": True}'/>
+
+            <!-- TAX ID -->
+            <p t-if="doc.partner_id.vat" class="mb-0">
+              <t t-if="doc.company_id.account_fiscal_country_id.vat_label"
+                 t-out="doc.company_id.account_fiscal_country_id.vat_label"/>
+              <t t-else="">Tax ID</t>:
+              <span t-field="doc.partner_id.vat"/>
+            </p>
+
+            <!-- PHONE fallback: phone -> mobile -> no mostrar -->
+            <t t-set="client_phone" t-value="(doc.partner_invoice_id.phone or doc.partner_invoice_id.mobile or '').strip()"/>
+                <p t-if="client_phone" class="mb-0">
+                    <i class="fa fa-phone me-1"/>
+                    <span t-esc="client_phone"/>
+                </p>
+            </t>
+        </xpath>
+
+
+        <!-- =========================================================
+             N) Total in words estilo invoice
+             ========================================================= -->
+        <xpath expr="//div[@id='total']" position="after">
+            <t t-if="'amount_total_words' in doc._fields and doc.amount_total_words">
+                <div class="row mt-2">
+                    <div class="col-12 text-end">
+                        <div class="fw-semibold" style="line-height:1.1;">Total amount in words:</div>
+                        <div class="text-muted" style="font-size:0.8125rem; line-height:1.25;">
+                            <span t-esc="(doc.amount_total_words or '').replace(',', '')"/>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+
+        <!-- =========================================================
+         D) Other customization
+         ========================================================= -->
+
+        <!-- Título grande + texto -->
+        <xpath expr="//t[@t-set='layout_document_title']" position="replace">
+            <t t-set="layout_document_title">
+                <span style="font-size: 22px; font-weight: 700;">
+                    Cost Estimation - <span t-field="doc.name"/>
+                </span>
+            </t>
+        </xpath>
+
+        <!-- Project debajo del título -->
+        <xpath expr="//t[@t-set='layout_document_title']" position="after">
+            <t t-if="doc.project_id">
+                <div style="margin-top:4px; margin-bottom:4px;">
+                    <span style="color:#4f86bd; font-weight:700;">Project:</span>
+                    <span style="font-weight:600;" t-field="doc.project_id"/>
+                </div>
+            </t>
+        </xpath>
+
+        <xpath expr="//div[@name='informations_date']" position="replace">
+          <div t-if="doc.date_order" class="col" name="informations_date">
+            <strong>Date</strong>
+            <div t-field="doc.date_order" t-options='{"widget": "date"}'/>
+          </div>
+        </xpath>
+
+        <!-- Expiration -> Valid Until -->
+        <xpath expr="//div[@name='expiration_date']/strong" position="replace">
+            <strong>Valid Until</strong>
+        </xpath>
+
+        <xpath expr="//t[@t-call='sale.document_tax_totals']/t[@t-set='tax_totals']" position="replace">
+            <t t-set="tax_totals" t-value="doc._obvio_tax_totals_rounded(0)"/>
+        </xpath>
+
+        <!-- =========================================================
+             Headers: mantener el orden y los nombres correctos
+             Taxes | Subtotal | Total
+             ========================================================= -->
+
+        <!-- Header de la columna reutilizada (th_priceunit) -> Taxes -->
+        <xpath expr="//th[@name='th_priceunit']" position="replace">
+            <th name="th_priceunit" class="text-start text-nowrap">Taxes</th>
+        </xpath>
+
+        <!-- Header de Taxes base (th_taxes) -> Subtotal -->
+        <xpath expr="//th[@name='th_taxes']" position="replace">
+            <th name="th_taxes" class="text-start text-nowrap">Subtotal</th>
+        </xpath>
+
+        <!-- Header de Amount/Subtotal base -> Total -->
+        <xpath expr="//th[@name='th_subtotal']/span" position="replace">
+            <span>Total</span>
+        </xpath>
+
+        <!-- =========================================================
+             Visibilidad columna Taxes (según tu flag)
+             ========================================================= -->
+        <xpath expr="//th[@name='th_priceunit']" position="attributes">
+            <attribute name="t-if">doc.show_tax_column</attribute>
+        </xpath>
+
+        <xpath expr="//td[@name='td_priceunit']" position="attributes">
+            <attribute name="t-if">doc.show_tax_column</attribute>
+        </xpath>
+
+        <!-- Para que no se deforme el layout PDF, si se usa colgroup -->
+        <xpath expr="//table[contains(@class,'obv-so-grid')]//colgroup//col[contains(@class,'c-taxes')]" position="attributes">
+            <attribute name="t-if">doc.show_tax_column</attribute>
+        </xpath>
+
+    </template>
+
+    <template id="sale_document_tax_totals_inherit_obvio_labels"
+              inherit_id="sale.document_tax_totals"
+              priority="60">
+
+        <!-- Untaxed Amount -> Subtotal (excl. taxes) -->
+        <xpath expr="//tr[contains(@class,'o_subtotal')]/td[1]/span" position="replace">
+            <span>Subtotal w/taxes</span>
+        </xpath>
+
+        <!-- (Opcional) si quieres renombrar también la fila de impuestos -->
+        <!--
+        <xpath expr="//tr[contains(@class,'o_taxes')]/td[1]/span" position="replace">
+            <span>Tax</span>
+        </xpath>
+        -->
+
+    </template>
+</odoo>

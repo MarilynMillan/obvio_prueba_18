@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+        <!-- Hereda name alias a la ficha del cliente  -->
+        <record id="view_partner_form_inherit" model="ir.ui.view">
+            <field name="name">partner.form.inherit</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='company_name']" position="before">
+                    <group>
+                        <field name="alias_name"/>
+                        <field name="customer_is" widget="boolean_toggle"/>
+                        <field name="is_operator" widget="boolean_toggle"/>
+                        <field name="codigo_operator" invisible="not is_operator"/>
+
+                    </group>
+                </xpath>  
+
+            </field>
+        </record>   
+
+</odoo>

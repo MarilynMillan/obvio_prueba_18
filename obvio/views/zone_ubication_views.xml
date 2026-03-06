@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+        <!-- Hereda name alias a la ficha del cliente  -->
+        <record id="view_zone_ubication_tree" model="ir.ui.view">
+            <field name="name">zone.ubication.tree</field>
+            <field name="model">zone.ubication</field>
+            <field name="arch" type="xml">
+                <list  string="Location">
+                    <field name="name"/>
+                    <field name="zone"/>
+                    <field name="zone_id"/>
+
+                </list >
+            </field>
+        </record>
+
+        <record id="view_zone_ubication_form" model="ir.ui.view">
+            <field name="name">zone.ubication.form</field>
+            <field name="model">zone.ubication</field>
+            <field name="arch" type="xml">
+                <form string="Location">
+                     <sheet>
+                       
+
+                        <group>
+                            <field name="name"/>
+                            <field name="zone"/>
+                            <field name="zone_id"/>
+                            
+                        </group>
+
+                         <group>
+                                 <field name="zone_tienda_ids" widget="one2many_list" options="{'create': False}"/>
+                        </group>
+
+                  
+                     </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="action_zone_ubication" model="ir.actions.act_window">
+            <field name="name">Location</field>
+            <field name="res_model">zone.ubication</field>
+            <field name="view_mode">list,form</field>
+            <field name="view_id" ref="view_zone_ubication_tree"/>
+            <field name="help" type="html">
+                <p>
+                    Manage the project location
+                </p>
+            </field>
+        </record>
+
+
+        <menuitem id="menu_zone_ubication" 
+          name="Location" 
+          parent="project.menu_project_config" 
+          action="action_zone_ubication" 
+          sequence="11"/>
+
+
+</odoo>

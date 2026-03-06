@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+        <!-- Hereda name alias a la ficha del cliente  -->
+        <record id="view_equipment_type_tree" model="ir.ui.view">
+            <field name="name">equipment.type.tree</field>
+            <field name="model">equipment.type</field>
+            <field name="arch" type="xml">
+                <list  string="Equipment Type">
+                    <field name="name"/>
+                    <field name="alias_name"/>
+                    <field name="user_id"/>
+                </list >
+            </field>
+        </record>
+
+        <record id="view_equipment_type_form" model="ir.ui.view">
+            <field name="name">equipment.type.form</field>
+            <field name="model">equipment.type</field>
+            <field name="arch" type="xml">
+                <form string="Equipment Type">
+                     <sheet>
+                     
+                             <div class="oe_title">
+                                <label for="name" string="Equipment Type"/>
+                                <h1>
+                                    <field name="name" placeholder="name ...." field_id="name_0"/>
+                                </h1>
+                            </div>
+
+
+                       <group>
+                        <group>
+                            <field name="alias_name"/>
+                            <field name="user_id"/>
+                            
+                        </group>
+
+
+                        <group>
+                            <field name="company_id"/>
+                        </group>
+                         <group>
+                          
+                            <field name="note"/>
+                        </group>
+
+                    </group>
+                     </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="action_equipment_type" model="ir.actions.act_window">
+            <field name="name">Equipment Type</field>
+            <field name="res_model">equipment.type</field>
+            <field name="view_mode">list,form</field>
+            <field name="view_id" ref="view_equipment_type_tree"/>
+            <field name="help" type="html">
+                <p>
+                    Manage equipment types
+                </p>
+            </field>
+        </record>
+
+
+        <menuitem id="menu_equipment_type" 
+            name="Equipment Type" 
+            parent="maintenance.menu_maintenance_configuration"  
+            action="action_equipment_type" 
+            />
+
+
+</odoo>

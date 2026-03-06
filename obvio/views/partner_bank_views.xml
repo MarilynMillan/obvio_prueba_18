@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+     <record id="view_partner_bank_pdf_list_inherit" model="ir.ui.view">
+        <field name="name">res.partner.form.bank.pdf.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="account.view_partner_property_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='bank_ids']/list" position="inside">
+                <field name="pdf_filename" column_invisible="True"/>
+                <field name="pdf_attachment" 
+                       filename="pdf_filename" 
+                       widget="download"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_partner_bank_form_pdf_account_inherit" model="ir.ui.view">
+        <field name="name">res.partner.bank.form.account.pdf.obvio</field>
+        <field name="model">res.partner.bank</field>
+        <field name="inherit_id" ref="account.view_partner_bank_form_inherit_account"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="pdf_filename" invisible="1"/>
+                <field name="pdf_attachment" 
+                       filename="pdf_filename" 
+                       widget="binary" 
+                       options="{'accepted_file_extensions': '.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx'}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

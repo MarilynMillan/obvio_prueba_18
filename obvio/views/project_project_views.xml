@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+        <!-- Hereda la vista del formulario del proyecto para agregar el campo de equipo de mantenimiento -->
+        <record id="view_project_form_inherit" model="ir.ui.view">
+            <field name="name">project.project.form.inherit</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.edit_project"/>
+            <field name="arch" type="xml">
+
+
+                <xpath expr="//field[@name='name']" position="before">
+                    <group >
+                        <field name="sequence_new" nolabel="1" style="text-align: center; font-weight: bold;" invisible="1"/>
+                    </group >
+                </xpath>
+
+
+                  <xpath expr="//field[@name='date_start']" position="after">
+                    <field name="is_template" groups="project.group_project_manager"/>
+                </xpath>
+
+                 <xpath expr="//field[@name='partner_id']" position="before">
+                        <field name="name_copy" />
+                </xpath>
+
+                  <xpath expr="//field[@name='partner_id']" position="after">
+                        <!--field name="partner_id"  required="not is_template"/-->
+                        <field name="type_project"  required="not is_template"/>
+                        <field name="zona_id" required="not is_template"/>
+                        <field name="partner_operator_id" required="not is_template"/>
+                        <field name="ubication_id" required="not is_template"/>
+                        <field name="tienda_id" required="not is_template"/>
+                        <field name="template_project_id" />
+                        <field name="create_equipment" />
+                </xpath>
+            
+
+                <xpath expr="//header" position="inside">
+                    <button name="create_maintenance_equipment"  type="object" class="btn-primary" string="Create maintenance team"  invisible="not create_equipment"/>
+                </xpath>
+
+                 <xpath expr="//field[@name='date_start']" position="attributes">
+                        <attribute name="required">not is_template</attribute>
+                </xpath>
+
+            <xpath expr="//field[@name='date']" position="attributes">
+                <attribute name="required">not is_template</attribute>
+            </xpath>
+
+             <xpath expr="//field[@name='tag_ids']" position="attributes">
+                <attribute name="required">not is_template</attribute>
+            </xpath>
+              <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="required">not is_template</attribute>
+            </xpath>
+
+            </field>
+        </record>  
+
+
+        <!-- herencia de form creacion de proyecto-->
+         <record id="view_project_form_create_inherit" model="ir.ui.view">
+            <field name="name">project.project.form.create.inherit</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.project_project_view_form_simplified"/>
+            <field name="arch" type="xml">
+
+
+                <xpath expr="//div[@name='alias_def']" position="before">
+                    <group>
+                        <field name="date_start" string="Planned Date" widget="daterange" options="{&quot;end_date_field&quot;: &quot;date&quot;, &quot;always_range&quot;: &quot;1&quot;}" required="date_start or date"/>
+                        <field name="date" invisible="1" required="date_start"/>
+                        <field name="type_project"  required="1"/>
+                        <field name="partner_id"  required="1"/>
+                        <field name="zona_id"  required="1"/>
+                        <field name="partner_operator_id" required="1"/>
+                        <field name="company_id"  invisible="1" />
+                        <field name="ubication_id"  required="1"/>
+                        <field name="tienda_id"  required="1"/>
+                        <field name="template_project_id" />
+                        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+
+                    </group>
+                </xpath>
+
+            </field>
+        </record> 
+
+        
+     
+
+
+          <!-- herencia de form creacion de proyecto-->
+         <record id="view_project_kanbac_inherit" model="ir.ui.view">
+            <field name="name">project.project.kanbac.inherit</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.view_project_kanban"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='display_name']" position="after">
+                    <group>
+                        <field name="sequence_new"/>
+                    </group>
+                </xpath>
+            </field>
+        </record> 
+
+        <!--record id="view_project_tree_inherit" model="ir.ui.view">
+            <field name="name">project.project.tree.inherit</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.view_project"/>
+            <field name="arch" type="xml">
+                 <xpath expr="//list/field[@name='name']" position="after">
+                    <field name="sequence" string="Sequence"/>
+                </xpath>
+                 
+            </field>
+        </record-->
+
+         <record id="view_project_project_filter_inherit" model="ir.ui.view">
+            <field name="name">project.project.search.jira</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.view_project_project_filter"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="type_project"/>
+                </field>
+                <filter name="Manager" position="before">
+                    <filter string="Tipo de proyecto" name="type_project" context="{'group_by': 'type_project'}"/>
+                   
+                </filter>
+            </field>
+        </record>
+
+          <record id="view_project_tree_inherit" model="ir.ui.view">
+            <field name="name">project.project.tree.inherit</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.view_project"/>
+            <field name="arch" type="xml">
+                 <xpath expr="//list/field[@name='name']" position="after">
+                    <field name="sequence_new" string="Sequence"/>
+                     <field name="priority" widget="priority" string="Priority"/>
+                </xpath>
+
+            </field>
+        </record>
+
+          <record id="project_project_view_form_simplified_inherit_partner_visible" model="ir.ui.view">
+            <field name="name">project.project.view.form.simplified.inherit.partner_always_visible</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="sale_project.project_project_view_form_simplified_inherit"/>
+            <field name="priority">40</field>
+            <field name="arch" type="xml">
+
+                <!-- Reemplazamos el div que tenía invisible="not allow_billable" -->
+                <xpath expr="//setting/div[field[@name='partner_id']]" position="replace">
+                    <div invisible="1">
+                        <label for="partner_id"/>
+                        <field name="partner_id"
+                            class="ms-1"
+                            widget="res_partner_many2one"
+                            context="{'res_partner_search_mode': 'customer'}"
+                            options="{'no_create_edit': True, 'no_open': True}"
+                            placeholder="Select who to bill..."/>
+                    </div>
+                </xpath>
+
+            </field>
+        </record>
+
+     <record id="project_sale_view_form_inherit" model="ir.ui.view">
+            <field name="name">project.project.view.form.simplified.inherit.partner_always_visible</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="sale_project.view_edit_project_inherit_form"/>
+            <field name="priority">40</field>
+            <field name="arch" type="xml">
+
+                    <xpath expr="//field[@name='partner_id']" position="attributes">
+                            <attribute name="invisible">1</attribute>
+                    </xpath>
+            
+    
+            </field>
+    </record> 
+
+    <record id="view_project_kanban_inherit_priority" model="ir.ui.view">
+        <field name="name">project.project.kanban.inherit.priority</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_kanban"/>
+        <field name="arch" type="xml">
+            <!--xpath expr="//field[@name='is_favorite']" position="after">
+                <field name="priority" widget="priority" class="ms-1"/>
+            </xpath-->
+            <xpath expr="//div[hasclass('ms-auto')]" position="inside">
+                <field name="priority" widget="priority" class="me-2"/>
+        </xpath>
+        </field>
+    </record>
+
+
+</odoo>

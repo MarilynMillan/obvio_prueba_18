@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sale_brand_sales_user,sale.brand sales user,model_sale_brand,base.group_user,1,1,1,1
+access_so_line_report_group_salesman,sale.order.line.report.group.salesman,model_sale_order_line_report_group,base.group_user,1,1,1,1

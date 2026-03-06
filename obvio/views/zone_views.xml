@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+         <!-- Hereda name alias a la ficha del cliente  -->
+        <record id="view_project_zone_tree" model="ir.ui.view">
+            <field name="name">project.zone.tree</field>
+            <field name="model">project.zone</field>
+            <field name="arch" type="xml">
+                <list  string="Country of the Project">
+                    <field name="country_id"/>
+                    <field name="code"/>
+                </list >
+            </field>
+        </record>
+
+        <record id="view_project_zone_form" model="ir.ui.view">
+            <field name="name">project.zone.form</field>
+            <field name="model">project.zone</field>
+            <field name="arch" type="xml">
+                <form string="Country of the Project">
+                     <sheet>
+                        
+                            <group>
+                             <field name="country_id" />
+                             <field name="code" />
+                            </group>
+                       
+                     
+                            <group >
+                                   <field name="zone_ubication_ids" widget="one2many_list" options="{'create': False}"/>
+                            </group>
+                         
+                  
+
+                     </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="action_project_zone" model="ir.actions.act_window">
+            <field name="name">Country</field>
+            <field name="res_model">project.zone</field>
+            <field name="view_mode">list,form</field>
+            <field name="view_id" ref="view_project_zone_tree"/>
+            <field name="help" type="html">
+                <p>
+                    Manages the project country.
+                </p>
+            </field>
+        </record>
+
+
+        <menuitem id="menu_project_zones" 
+          name="Country" 
+          parent="project.menu_project_config" 
+          action="action_project_zone" 
+          sequence="10"/>
+
+</odoo>

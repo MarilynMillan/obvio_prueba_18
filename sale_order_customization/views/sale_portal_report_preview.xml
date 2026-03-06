@@ -1,0 +1,17 @@
+<odoo>
+    <template id="sale_order_portal_content_report_embed"
+              inherit_id="sale.sale_order_portal_content"
+              priority="100">
+
+        <xpath expr="." position="replace">
+            <t>
+                <div class="o_sale_report_preview bg-white rounded">
+                    <iframe t-att-src="sale_order.get_portal_url(report_type='html')"
+                            class="w-100 border-0"
+                            style="min-height: 1250px; background: #fff;"
+                            loading="lazy"/>
+                </div>
+            </t>
+        </xpath>
+    </template>
+</odoo>

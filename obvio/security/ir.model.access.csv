@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_mmaintenance_quipment_image_manager,maintenance_equipment_image_manager,model_maintenance_equipment_image,,1,1,1,1
+access_maintenance_equipment_image_technical_manager,maintenance_equipment_image_technical_manager,model_maintenance_equipment_image_technical,,1,1,1,1
+access_maintenance_equipment_image_hardware_manager,maintenance_equipment_image_hardware_manager,model_maintenance_equipment_image_hardware,,1,1,1,1
+access_project_zone_manager,project_zone_manager,model_project_zone,,1,1,1,1
+access_zone_ubication_manager,zone_ubication_manager,model_zone_ubication,,1,1,1,1
+access_zone_tienda_manager,zone_tienda_manager,model_zone_tienda,,1,1,1,1
+access_type_project_manager,type_project_manager,model_type_project,,1,1,1,1
+access_equipment_type_manager,equipment_type_manager,model_equipment_type,,1,1,1,1
