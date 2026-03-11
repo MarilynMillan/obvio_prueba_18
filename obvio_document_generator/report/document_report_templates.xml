@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_task_document">
+        <t t-call="web.html_container">
+            <style>
+                /* Limpieza total de márgenes de Odoo */
+                @page { margin: 0; }
+                body { margin: 0; padding: 0; }
+
+                .page-container {
+                    width: 100%;
+                    height: 210mm;
+                    page-break-after: always;
+                    font-family: 'Helvetica', sans-serif;
+                    border-collapse: collapse;
+                    table-layout: fixed;
+                }
+                .sidebar {
+                    width: 25%;
+                    background-color: #5b9bd5;
+                    color: white;
+                    vertical-align: top;
+                    padding: 50px 20px;
+                    text-align: right;
+                }
+                .main-area {
+                    width: 75%;
+                    background-color: #f8f9fa;
+                    vertical-align: top;
+                    position: relative;
+                }
+                .label {
+                    font-size: 11px;
+                    font-weight: bold;
+                    text-transform: uppercase;
+                    opacity: 0.8;
+                    margin-bottom: 2px;
+                    display: block;
+                }
+                .value {
+                    font-size: 15px;
+                    margin-bottom: 25px;
+                    display: block;
+                    line-height: 1.2;
+                }
+            </style>
+
+            <t t-foreach="docs" t-as="o">
+
+                <div class="page" style="page-break-after: always; height: 100vh;">
+                    <table style="width: 100%; height: 210mm; background-color: #5b9bd5; color: white; text-align: center; border-collapse: collapse;">
+                        <tr>
+                            <td style="vertical-align: middle; padding: 40px;">
+                                <h1 style="font-size: 45px; text-transform: uppercase; font-weight: bold;" t-esc="'SUPPORTING DOCUMENTS REPORT / REPORTE DE DOCUMENTO DE RESPALDO'"/>
+                                <div style="width: 120px; height: 5px; background-color: white; margin: 30px auto;"/>
+                                <h3 style="font-size: 24px; font-weight: normal;" t-esc="o.project_id.name"/>
+                                <div style="margin-top: 50mm; font-size: 20px;">
+                                    <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%B %Y')"/>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <t t-set="images" t-value="o._get_document_images()"/>
+                <t t-foreach="images" t-as="img">
+                    <div class="page" style="page-break-after: always; height: 100vh;">
+                        <table class="page-container" style="border-collapse: collapse;">
+                            <tr>
+                                <td class="sidebar">
+                                    <div style="margin-top: 30mm;">
+                                        <span class="label">SHORT NAME</span>
+                                        <span class="value" t-esc="o.project_id.name_copy or '-'"/>
+
+                                        <span class="label">CUSTOMER</span>
+                                        <span class="value" t-esc="o.project_id.partner_id.name or '-'"/>
+
+                                        <span class="label">PROJECT TYPE</span>
+                                        <span class="value" t-esc="o.project_id.type_project.name or '-'"/>
+
+                                        <span class="label">COUNTRY</span>
+                                        <span class="value" t-esc="o.project_id.zona_id.display_name or '-'"/>
+
+                                        <span class="label">OPERATOR</span>
+                                        <span class="value" t-esc="o.project_id.partner_operator_id.name or '-'"/>
+
+                                        <span class="label">LOCATION</span>
+                                        <span class="value" t-esc="o.project_id.ubication_id.display_name or '-'"/>
+
+                                        <span class="label">STORE</span>
+                                        <span class="value" t-esc="o.project_id.tienda_id.display_name or '-'"/>
+
+                                        <span class="label">COMMENT</span>
+                                        <span class="value" style="font-size: 13px;" t-esc="o.document_comment or '-'"/>
+                                    </div>
+                                </td>
+
+                                <td class="main-area">
+                                    <div style="padding: 30px; color: #5b9bd5; height: 50px;">
+                                        <h2 style="font-size: 22px; font-weight: bold; border-bottom: 2px solid #5b9bd5;" t-esc="o.name"/>
+                                    </div>
+
+                                    <div style="height: 150mm; text-align: center; vertical-align: middle; display: block; padding-top: 5mm;">
+                                        <t t-if="img and img.datas">
+                                            <img t-att-src="image_data_uri(img.datas)"
+                                                 style="max-width: 90%; max-height: 140mm; border: 10px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.1);"/>
+                                        </t>
+                                    </div>
+
+                                    <div style="position: absolute; bottom: 10mm; right: 40px; text-align: right; width: 100%;">
+                                        <strong style="color: #5b9bd5; font-size: 32px; letter-spacing: 3px;">OBVIO</strong>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </t>
+
+                <div class="page" style="height: 100vh;">
+                    <table style="width: 100%; height: 210mm; background-color: #5b9bd5; color: white; text-align: center; border-collapse: collapse;">
+                        <tr>
+                            <td style="vertical-align: middle;">
+                                <h2 style="font-size: 45px; letter-spacing: 8px; font-weight: bold;">THANK YOU</h2>
+                                <p style="font-size: 20px; opacity: 0.8;" t-esc="o.project_id.name"/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+            </t>
+        </t>
+    </template>
+</odoo>
