@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="project_task_type_view_form_inherit_document_generator" model="ir.ui.view">
+        <field name="name">project.task.type.view.form.inherit.document.generator</field>
+        <field name="model">project.task.type</field>
+        <field name="inherit_id" ref="project.task_type_edit"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='fold']" position="after">
+                <field name="is_document_generator"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

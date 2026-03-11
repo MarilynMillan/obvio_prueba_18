@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_task_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-set="images" t-value="o._get_document_images()"/>
+                <!-- If no images, still show at least one slide with just the comment/info -->
+                <t t-if="not images">
+                    <t t-set="images" t-value="[False]"/>
+                </t>
+
+                <t t-foreach="images" t-as="img">
+                    <div class="page" style="page-break-after: always; margin: 0; padding: 0; width: 100%; height: 100vh; position: relative; font-family: sans-serif;">
+                        <!-- Left Sidebar -->
+                        <div style="position: absolute; top: 0; left: 0; width: 25%; height: 100%; background-color: #5b9bd5; color: white; padding-right: 20px; box-sizing: border-box;">
+
+                            <div style="text-align: right; margin-bottom: 20px; margin-top: 50px;">
+                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">CLIENT:</strong>
+                                <span style="font-size: 14px;" t-esc="o.project_id.partner_id.name or ''"/>
+                            </div>
+
+                            <div style="text-align: right; margin-bottom: 20px;">
+                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">BRAND:</strong>
+                                <!-- Adjust this field name if brand is stored differently -->
+                                <span style="font-size: 14px;" t-esc="o.project_id.name or ''"/>
+                            </div>
+
+                            <div style="text-align: right; margin-bottom: 20px;">
+                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">REGION:</strong>
+                                <span style="font-size: 14px;" t-esc="o.project_id.zona_id.name or ''"/>
+                            </div>
+
+                            <div style="text-align: right; margin-bottom: 20px;">
+                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">COUNTRY:</strong>
+                                <span style="font-size: 14px;" t-esc="o.project_id.zona_id.name or ''"/>
+                            </div>
+
+                            <div style="text-align: right; margin-bottom: 20px;">
+                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">TRADE CHANNEL:</strong>
+                                <span style="font-size: 14px;" t-esc="o.project_id.tienda_id.tienda or ''"/>
+                            </div>
+
+                            <div style="text-align: right; margin-bottom: 20px;">
+                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">LOCATION:</strong>
+                                <span style="font-size: 14px;" t-esc="o.project_id.ubication_id.zone or ''"/>
+                            </div>
+
+                            <div style="text-align: right; margin-bottom: 20px;">
+                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">OPERATOR:</strong>
+                                <span style="font-size: 14px;" t-esc="o.project_id.partner_operator_id.name or ''"/>
+                            </div>
+
+                            <div style="text-align: right; margin-bottom: 20px;">
+                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">COMMENT:</strong>
+                                <span style="font-size: 14px;" t-esc="o.document_comment or ''"/>
+                            </div>
+                        </div>
+
+                        <!-- Main Content Area -->
+                        <div style="position: absolute; top: 0; left: 25%; width: 75%; height: 100%; background-color: #f2f2f2;">
+                            <!-- Header / Title -->
+                            <div style="padding: 20px; font-size: 24px; color: #5b9bd5; height: 10%;">
+                                <span t-esc="o.name"/>
+                            </div>
+
+                            <!-- Image Display -->
+                            <div style="padding: 20px; box-sizing: border-box; overflow: hidden; height: 75%; text-align: center;">
+                                <t t-if="img and img.datas">
+                                    <img t-att-src="image_data_uri(img.datas)"
+                                         style="max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0px 4px 8px rgba(0,0,0,0.3);"/>
+                                </t>
+                                <t t-else="">
+                                    <div style="color: #999; font-style: italic; margin-top: 100px;">No image attached</div>
+                                </t>
+                            </div>
+
+                            <!-- Footer -->
+                            <div style="padding: 20px; text-align: right; height: 15%;">
+                                <img src="/obvio_document_generator/static/description/icon.png" style="height: 30px;" t-if="False"/> <!-- Placeholder for Obvio logo -->
+                                <strong style="color: #5b9bd5; font-size: 20px;">OBVIO</strong>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
