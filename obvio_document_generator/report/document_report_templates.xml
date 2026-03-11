@@ -15,29 +15,28 @@
                         <div style="position: absolute; top: 0; left: 0; width: 25%; height: 100%; background-color: #5b9bd5; color: white; padding-right: 20px; box-sizing: border-box;">
 
                             <div style="text-align: right; margin-bottom: 20px; margin-top: 50px;">
-                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">CLIENT:</strong>
+                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">SHORT NAME:</strong>
+                                <span style="font-size: 14px;" t-esc="o.project_id.name_copy or ''"/>
+                            </div>
+
+                            <div style="text-align: right; margin-bottom: 20px;">
+                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">CUSTOMER:</strong>
                                 <span style="font-size: 14px;" t-esc="o.project_id.partner_id.name or ''"/>
                             </div>
 
                             <div style="text-align: right; margin-bottom: 20px;">
-                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">BRAND:</strong>
-                                <!-- Adjust this field name if brand is stored differently -->
-                                <span style="font-size: 14px;" t-esc="o.project_id.name or ''"/>
-                            </div>
-
-                            <div style="text-align: right; margin-bottom: 20px;">
-                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">REGION:</strong>
-                                <span style="font-size: 14px;" t-esc="o.project_id.zona_id.name or ''"/>
+                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">PROJECT TYPE:</strong>
+                                <span style="font-size: 14px;" t-esc="o.project_id.type_project.name or ''"/>
                             </div>
 
                             <div style="text-align: right; margin-bottom: 20px;">
                                 <strong style="display: block; font-size: 14px; text-transform: uppercase;">COUNTRY:</strong>
-                                <span style="font-size: 14px;" t-esc="o.project_id.zona_id.name or ''"/>
+                                <span style="font-size: 14px;" t-esc="o.project_id.zona_id.display_name or ''"/>
                             </div>
 
                             <div style="text-align: right; margin-bottom: 20px;">
-                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">TRADE CHANNEL:</strong>
-                                <span style="font-size: 14px;" t-esc="o.project_id.tienda_id.tienda or ''"/>
+                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">OPERATOR:</strong>
+                                <span style="font-size: 14px;" t-esc="o.project_id.partner_operator_id.name or ''"/>
                             </div>
 
                             <div style="text-align: right; margin-bottom: 20px;">
@@ -46,8 +45,8 @@
                             </div>
 
                             <div style="text-align: right; margin-bottom: 20px;">
-                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">OPERATOR:</strong>
-                                <span style="font-size: 14px;" t-esc="o.project_id.partner_operator_id.name or ''"/>
+                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">STORE:</strong>
+                                <span style="font-size: 14px;" t-esc="o.project_id.tienda_id.tienda or ''"/>
                             </div>
 
                             <div style="text-align: right; margin-bottom: 20px;">
