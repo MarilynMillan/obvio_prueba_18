@@ -26,5 +26,5 @@ class ProjectTask(models.Model):
             ('res_model', '=', 'project.task'),
             ('res_id', '=', self.id),
             ('mimetype', 'ilike', 'image/')
-        ])
+        ], order='create_date asc')
         return attachments

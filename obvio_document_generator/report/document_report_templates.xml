@@ -2,85 +2,131 @@
 <odoo>
     <template id="report_task_document">
         <t t-call="web.html_container">
+            <style>
+                /* Limpieza total de márgenes de Odoo */
+                @page { margin: 0; }
+                body { margin: 0; padding: 0; }
+
+                .page-container {
+                    width: 100%;
+                    height: 210mm;
+                    page-break-after: always;
+                    font-family: 'Helvetica', sans-serif;
+                    border-collapse: collapse;
+                    table-layout: fixed;
+                }
+                .sidebar {
+                    width: 25%;
+                    background-color: #5b9bd5;
+                    color: white;
+                    vertical-align: top;
+                    padding: 50px 20px;
+                    text-align: right;
+                }
+                .main-area {
+                    width: 75%;
+                    background-color: #f8f9fa;
+                    vertical-align: top;
+                    position: relative;
+                }
+                .label {
+                    font-size: 11px;
+                    font-weight: bold;
+                    text-transform: uppercase;
+                    opacity: 0.8;
+                    margin-bottom: 2px;
+                    display: block;
+                }
+                .value {
+                    font-size: 15px;
+                    margin-bottom: 25px;
+                    display: block;
+                    line-height: 1.2;
+                }
+            </style>
+
             <t t-foreach="docs" t-as="o">
+
+                <div class="page" style="page-break-after: always; height: 100vh;">
+                    <table style="width: 100%; height: 210mm; background-color: #5b9bd5; color: white; text-align: center; border-collapse: collapse;">
+                        <tr>
+                            <td style="vertical-align: middle; padding: 40px;">
+                                <h1 style="font-size: 45px; text-transform: uppercase; font-weight: bold;" t-esc="'SUPPORTING DOCUMENTS REPORT / REPORTE DE DOCUMENTO DE RESPALDO'"/>
+                                <div style="width: 120px; height: 5px; background-color: white; margin: 30px auto;"/>
+                                <h3 style="font-size: 24px; font-weight: normal;" t-esc="o.project_id.name"/>
+                                <div style="margin-top: 50mm; font-size: 20px;">
+                                    <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%B %Y')"/>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
                 <t t-set="images" t-value="o._get_document_images()"/>
-                <!-- If no images, still show at least one slide with just the comment/info -->
-                <t t-if="not images">
-                    <t t-set="images" t-value="[False]"/>
-                </t>
-
                 <t t-foreach="images" t-as="img">
-                    <div class="page" style="page-break-after: always; margin: 0; padding: 0; width: 100%; height: 100vh; position: relative; font-family: sans-serif;">
-                        <!-- Left Sidebar -->
-                        <div style="position: absolute; top: 0; left: 0; width: 25%; height: 100%; background-color: #5b9bd5; color: white; padding-right: 20px; box-sizing: border-box;">
+                    <div class="page" style="page-break-after: always; height: 100vh;">
+                        <table class="page-container" style="border-collapse: collapse;">
+                            <tr>
+                                <td class="sidebar">
+                                    <div style="margin-top: 30mm;">
+                                        <span class="label">SHORT NAME</span>
+                                        <span class="value" t-esc="o.project_id.name_copy or '-'"/>
 
-                            <div style="text-align: right; margin-bottom: 20px; margin-top: 50px;">
-                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">SHORT NAME:</strong>
-                                <span style="font-size: 14px;" t-esc="o.project_id.name_copy or ''"/>
-                            </div>
+                                        <span class="label">CUSTOMER</span>
+                                        <span class="value" t-esc="o.project_id.partner_id.name or '-'"/>
 
-                            <div style="text-align: right; margin-bottom: 20px;">
-                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">CUSTOMER:</strong>
-                                <span style="font-size: 14px;" t-esc="o.project_id.partner_id.name or ''"/>
-                            </div>
+                                        <span class="label">PROJECT TYPE</span>
+                                        <span class="value" t-esc="o.project_id.type_project.name or '-'"/>
 
-                            <div style="text-align: right; margin-bottom: 20px;">
-                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">PROJECT TYPE:</strong>
-                                <span style="font-size: 14px;" t-esc="o.project_id.type_project.name or ''"/>
-                            </div>
+                                        <span class="label">COUNTRY</span>
+                                        <span class="value" t-esc="o.project_id.zona_id.display_name or '-'"/>
 
-                            <div style="text-align: right; margin-bottom: 20px;">
-                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">COUNTRY:</strong>
-                                <span style="font-size: 14px;" t-esc="o.project_id.zona_id.display_name or ''"/>
-                            </div>
+                                        <span class="label">OPERATOR</span>
+                                        <span class="value" t-esc="o.project_id.partner_operator_id.name or '-'"/>
 
-                            <div style="text-align: right; margin-bottom: 20px;">
-                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">OPERATOR:</strong>
-                                <span style="font-size: 14px;" t-esc="o.project_id.partner_operator_id.name or ''"/>
-                            </div>
+                                        <span class="label">LOCATION</span>
+                                        <span class="value" t-esc="o.project_id.ubication_id.display_name or '-'"/>
 
-                            <div style="text-align: right; margin-bottom: 20px;">
-                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">LOCATION:</strong>
-                                <span style="font-size: 14px;" t-esc="o.project_id.ubication_id.zone or ''"/>
-                            </div>
+                                        <span class="label">STORE</span>
+                                        <span class="value" t-esc="o.project_id.tienda_id.display_name or '-'"/>
 
-                            <div style="text-align: right; margin-bottom: 20px;">
-                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">STORE:</strong>
-                                <span style="font-size: 14px;" t-esc="o.project_id.tienda_id.tienda or ''"/>
-                            </div>
+                                        <span class="label">COMMENT</span>
+                                        <span class="value" style="font-size: 13px;" t-esc="o.document_comment or '-'"/>
+                                    </div>
+                                </td>
 
-                            <div style="text-align: right; margin-bottom: 20px;">
-                                <strong style="display: block; font-size: 14px; text-transform: uppercase;">COMMENT:</strong>
-                                <span style="font-size: 14px;" t-esc="o.document_comment or ''"/>
-                            </div>
-                        </div>
+                                <td class="main-area">
+                                    <div style="padding: 30px; color: #5b9bd5; height: 50px;">
+                                        <h2 style="font-size: 22px; font-weight: bold; border-bottom: 2px solid #5b9bd5;" t-esc="o.name"/>
+                                    </div>
 
-                        <!-- Main Content Area -->
-                        <div style="position: absolute; top: 0; left: 25%; width: 75%; height: 100%; background-color: #f2f2f2;">
-                            <!-- Header / Title -->
-                            <div style="padding: 20px; font-size: 24px; color: #5b9bd5; height: 10%;">
-                                <span t-esc="o.name"/>
-                            </div>
+                                    <div style="height: 150mm; text-align: center; vertical-align: middle; display: block; padding-top: 5mm;">
+                                        <t t-if="img and img.datas">
+                                            <img t-att-src="image_data_uri(img.datas)"
+                                                 style="max-width: 90%; max-height: 140mm; border: 10px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.1);"/>
+                                        </t>
+                                    </div>
 
-                            <!-- Image Display -->
-                            <div style="padding: 20px; box-sizing: border-box; overflow: hidden; height: 75%; text-align: center;">
-                                <t t-if="img and img.datas">
-                                    <img t-att-src="image_data_uri(img.datas)"
-                                         style="max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0px 4px 8px rgba(0,0,0,0.3);"/>
-                                </t>
-                                <t t-else="">
-                                    <div style="color: #999; font-style: italic; margin-top: 100px;">No image attached</div>
-                                </t>
-                            </div>
-
-                            <!-- Footer -->
-                            <div style="padding: 20px; text-align: right; height: 15%;">
-                                <img src="/obvio_document_generator/static/description/icon.png" style="height: 30px;" t-if="False"/> <!-- Placeholder for Obvio logo -->
-                                <strong style="color: #5b9bd5; font-size: 20px;">OBVIO</strong>
-                            </div>
-                        </div>
+                                    <div style="position: absolute; bottom: 10mm; right: 40px; text-align: right; width: 100%;">
+                                        <strong style="color: #5b9bd5; font-size: 32px; letter-spacing: 3px;">OBVIO</strong>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 </t>
+
+                <div class="page" style="height: 100vh;">
+                    <table style="width: 100%; height: 210mm; background-color: #5b9bd5; color: white; text-align: center; border-collapse: collapse;">
+                        <tr>
+                            <td style="vertical-align: middle;">
+                                <h2 style="font-size: 45px; letter-spacing: 8px; font-weight: bold;">THANK YOU</h2>
+                                <p style="font-size: 20px; opacity: 0.8;" t-esc="o.project_id.name"/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
             </t>
         </t>
     </template>
