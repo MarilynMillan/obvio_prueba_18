@@ -9,7 +9,7 @@
     'version': '18.0',
     'author': 'Ing.Marilynmillan',
     
-    'depends': ['base', 'maintenance','project','sale_project','account', 'analytic'],
+    'depends': ['base','maintenance','project','sale_project','account', 'analytic','documents'],
     "data": [
         "security/ir.model.access.csv",
         "views/project_project_views.xml",
@@ -23,7 +23,7 @@
         "views/type_equipment_views.xml",
         "views/equipment_maintenance_views.xml",
         "views/account_analytic_account_views.xml",
-         
+        "views/project_task_views.xml",
     ],
 
     'demo': [],

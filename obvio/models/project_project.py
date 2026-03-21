@@ -56,6 +56,9 @@ class ProjectProject(models.Model):
     original_name = fields.Char(string='Original name', copy=False)
     name_copy = fields.Char(string='Short name',help="Short project name. Used in automatic naming.")
     sequence_new = fields.Char(string='Sequence', readonly=True, copy=False)
+    is_subproject = fields.Boolean(string='Is a Sub-project', default=False)
+    parent_project_id = fields.Many2one('project.project', string='Parent Project', domain=[('is_template', '=', False)])
+    subproject_suffix = fields.Char(string='Sub-project Suffix', size=2)
     priority = fields.Selection([
         ('0', 'very low'),
         ('1', 'Low'),
@@ -145,6 +148,18 @@ class ProjectProject(models.Model):
             # 🔸 Si es plantilla, marcar 'sequence' como 'TEMPLATE' y no generar correlativo
             if vals.get('is_template'):
                 vals['sequence_new'] = 'TEMPLATE'
+            elif vals.get('is_subproject') and vals.get('parent_project_id'):
+                parent = self.env['project.project'].browse(vals['parent_project_id'])
+                suffix = vals.get('subproject_suffix', '').strip()
+                if parent.sequence_new and parent.sequence_new != 'TEMPLATE':
+                    base_sequence = parent.sequence_new
+                    if base_sequence.split(' ')[-1].isalpha() and len(base_sequence.split(' ')[-1]) <= 2:
+                        base_sequence = ' '.join(base_sequence.split(' ')[:-1])
+                    vals['sequence_new'] = f"{base_sequence} {suffix}" if suffix else base_sequence
+                else:
+                    vals['sequence_new'] = self.env['ir.sequence'].next_by_code('project.project') or '/'
+                    if suffix:
+                        vals['sequence_new'] = f"{vals['sequence_new']} {suffix}"
             else:
                 # 🔹 Si no tiene correlativo (nuevo proyecto), generarlo
                 if not vals.get('sequence_new') or vals['sequence_new'] in ['New', '/', False]:
@@ -220,6 +235,9 @@ class ProjectProject(models.Model):
             'tienda_id',
             'ubication_id',
             'name_copy',
+            'is_subproject',
+            'parent_project_id',
+            'subproject_suffix',
         ]
 
         if any(campo in vals for campo in campos_nomenclatura):
@@ -228,6 +246,20 @@ class ProjectProject(models.Model):
 
                 # 🔹 Usar el correlativo correcto
                 sequence_new = vals.get('sequence_new', project.sequence_new) or ''
+
+                is_subproject = vals.get('is_subproject', project.is_subproject)
+                if is_subproject:
+                    parent_project_id = vals.get('parent_project_id', project.parent_project_id.id)
+                    subproject_suffix = vals.get('subproject_suffix', project.subproject_suffix or '').strip()
+                    if parent_project_id:
+                        parent = self.env['project.project'].browse(parent_project_id)
+                        if parent.sequence_new and parent.sequence_new != 'TEMPLATE':
+                            base_sequence = parent.sequence_new
+                            if base_sequence.split(' ')[-1].isalpha() and len(base_sequence.split(' ')[-1]) <= 2:
+                                base_sequence = ' '.join(base_sequence.split(' ')[:-1])
+                            sequence_new = f"{base_sequence} {subproject_suffix}" if subproject_suffix else base_sequence
+                            if sequence_new != project.sequence_new:
+                                super(ProjectProject, project).write({'sequence_new': sequence_new})
 
                 # 🔹 Obtener los alias/valores actualizados
                 type_project_alias = self.env['type.project'].browse(vals.get('type_project', project.type_project.id)).alias_name or ''

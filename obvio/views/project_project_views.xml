@@ -33,6 +33,9 @@
                         <field name="tienda_id" required="not is_template"/>
                         <field name="template_project_id" />
                         <field name="create_equipment" />
+                        <field name="is_subproject" />
+                        <field name="parent_project_id" invisible="not is_subproject" required="is_subproject"/>
+                        <field name="subproject_suffix" invisible="not is_subproject" required="is_subproject"/>
                 </xpath>
             
 
@@ -79,6 +82,9 @@
                         <field name="ubication_id"  required="1"/>
                         <field name="tienda_id"  required="1"/>
                         <field name="template_project_id" />
+                        <field name="is_subproject" />
+                        <field name="parent_project_id" invisible="not is_subproject" required="is_subproject"/>
+                        <field name="subproject_suffix" invisible="not is_subproject" required="is_subproject"/>
                         <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
 
                     </group>

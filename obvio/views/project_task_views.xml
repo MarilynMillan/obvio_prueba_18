@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_task_form2_inherit" model="ir.ui.view">
+        <field name="name">project.task.form.inherit</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='project_id']" position="after">
+                <field name="is_subtask_seq" />
+                <field name="parent_task_seq_id" invisible="not is_subtask_seq" required="is_subtask_seq"/>
+                <field name="subtask_seq_suffix" invisible="not is_subtask_seq" required="is_subtask_seq"/>
+                <field name="sequence_new" readonly="1" invisible="not sequence_new"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
