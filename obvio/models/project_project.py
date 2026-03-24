@@ -142,8 +142,9 @@ class ProjectProject(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
+            is_template = vals.get('is_template')
             # 🔸 Si es plantilla, marcar 'sequence' como 'TEMPLATE' y no generar correlativo
-            if vals.get('is_template'):
+            if is_template:
                 vals['sequence_new'] = 'TEMPLATE'
             else:
                 # 🔹 Si no tiene correlativo (nuevo proyecto), generarlo
@@ -163,26 +164,29 @@ class ProjectProject(models.Model):
             ubication_name = self.env['zone.ubication'].browse(vals.get('ubication_id', False)).zone or ''
             project_name_short = vals['name_copy']
 
-            # Construir el nombre completo en orden fijo
-            name_parts = [vals['sequence_new']]
-            if type_project_alias:
-                name_parts.append(type_project_alias)
-            if partner_alias:
-                name_parts.append(partner_alias)
-            if project_name_short:
-                name_parts.append(project_name_short)
-            #if partner_alias:
-                #name_parts.append(partner_alias)
-            if operator_code:
-                name_parts.append(operator_code)
-            if tienda_name:
-                name_parts.append(tienda_name)
-            if ubication_name:
-                name_parts.append(ubication_name)
-            if zona_info:
-                name_parts.append(zona_info)
+            if is_template:
+                vals['name'] = "TEMPLATE - " + (project_name_short or vals.get('original_name') or '')
+            else:
+                # Construir el nombre completo en orden fijo
+                name_parts = [vals['sequence_new']]
+                if type_project_alias:
+                    name_parts.append(type_project_alias)
+                if partner_alias:
+                    name_parts.append(partner_alias)
+                if project_name_short:
+                    name_parts.append(project_name_short)
+                #if partner_alias:
+                    #name_parts.append(partner_alias)
+                if operator_code:
+                    name_parts.append(operator_code)
+                if tienda_name:
+                    name_parts.append(tienda_name)
+                if ubication_name:
+                    name_parts.append(ubication_name)
+                if zona_info:
+                    name_parts.append(zona_info)
 
-            vals['name'] = " - ".join(part for part in name_parts if part)
+                vals['name'] = " - ".join(part for part in name_parts if part)
 
         # Crear proyectos
         projects = super(ProjectProject, self).create(vals_list)
@@ -209,6 +213,9 @@ class ProjectProject(models.Model):
 
 
 
+    def unlink(self):
+        return super(ProjectProject, self.with_context(is_unlinking_parent=True)).unlink()
+
     def write(self, vals):
         res = super(ProjectProject, self).write(vals)
 
@@ -224,6 +231,7 @@ class ProjectProject(models.Model):
 
         if any(campo in vals for campo in campos_nomenclatura):
             for project in self:
+                is_template = vals.get('is_template', project.is_template)
                 project_name_short = project.name_copy or project.original_name
 
                 # 🔹 Usar el correlativo correcto
@@ -237,24 +245,27 @@ class ProjectProject(models.Model):
                 tienda_name = self.env['zone.tienda'].browse(vals.get('tienda_id', project.tienda_id.id)).tienda or ''
                 ubication_name = self.env['zone.ubication'].browse(vals.get('ubication_id', project.ubication_id.id)).zone or ''
 
-                # 🔹 Reconstruir el nombre completo con el correlativo (como en create)
-                name_parts = [sequence_new]
-                if type_project_alias:
-                    name_parts.append(type_project_alias)
-                if partner_alias:
-                    name_parts.append(partner_alias)
-                if project_name_short:
-                    name_parts.append(project_name_short)
-                if operator_code:
-                    name_parts.append(operator_code)
-                if tienda_name:
-                    name_parts.append(tienda_name)
-                if ubication_name:
-                    name_parts.append(ubication_name)
-                if zona_info:
-                    name_parts.append(zona_info)
+                if is_template:
+                    new_name = "TEMPLATE - " + (project_name_short or project.original_name or '')
+                else:
+                    # 🔹 Reconstruir el nombre completo con el correlativo (como en create)
+                    name_parts = [sequence_new]
+                    if type_project_alias:
+                        name_parts.append(type_project_alias)
+                    if partner_alias:
+                        name_parts.append(partner_alias)
+                    if project_name_short:
+                        name_parts.append(project_name_short)
+                    if operator_code:
+                        name_parts.append(operator_code)
+                    if tienda_name:
+                        name_parts.append(tienda_name)
+                    if ubication_name:
+                        name_parts.append(ubication_name)
+                    if zona_info:
+                        name_parts.append(zona_info)
 
-                new_name = " - ".join(part for part in name_parts if part)
+                    new_name = " - ".join(part for part in name_parts if part)
 
                 if new_name != project.name:
                     super(ProjectProject, project).write({'name': new_name})
