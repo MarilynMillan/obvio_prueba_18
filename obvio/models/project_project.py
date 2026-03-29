@@ -89,6 +89,51 @@ class ProjectProject(models.Model):
         
 
 
+    @api.onchange('is_template', 'name_copy', 'type_project', 'partner_id', 'partner_operator_id', 'zona_id', 'tienda_id', 'ubication_id', 'is_subproject', 'parent_project_id', 'subproject_suffix')
+    def _onchange_nomenclatura(self):
+        """
+        Actualiza el campo 'name' dinámicamente en la vista cuando el usuario edita
+        el nombre corto o cualquier campo de la nomenclatura.
+        """
+        for project in self:
+            is_template = project.is_template
+            project_name_short = project.name_copy or project.original_name
+
+            if is_template:
+                project.name = "TEMPLATE - " + (project_name_short or '')
+                continue
+
+            # Determinación temporal del correlativo
+            sequence_new = project.sequence_new or '/'
+            if project.is_subproject and project.parent_project_id:
+                parent = project.parent_project_id
+                suffix = (project.subproject_suffix or '').strip()
+                if parent.sequence_new and parent.sequence_new != 'TEMPLATE':
+                    base_sequence = parent.sequence_new
+                    parts = base_sequence.split(' ')
+                    if parts and parts[-1].isalpha() and len(parts[-1]) <= 2:
+                        base_sequence = ' '.join(parts[:-1])
+                    sequence_new = f"{base_sequence} {suffix}" if suffix else base_sequence
+
+            # Construir el nombre completo en orden fijo
+            type_project_alias = project.type_project.alias_name if project.type_project else ''
+            partner_alias = project.partner_id.alias_name if project.partner_id else ''
+            operator_code = project.partner_operator_id.codigo_operator if project.partner_operator_id else ''
+            zona_info = project.zona_id.code if project.zona_id else ''
+            tienda_name = project.tienda_id.tienda if project.tienda_id else ''
+            ubication_name = project.ubication_id.zone if project.ubication_id else ''
+
+            name_parts = [sequence_new]
+            if type_project_alias: name_parts.append(type_project_alias)
+            if partner_alias: name_parts.append(partner_alias)
+            if project_name_short: name_parts.append(project_name_short)
+            if operator_code: name_parts.append(operator_code)
+            if tienda_name: name_parts.append(tienda_name)
+            if ubication_name: name_parts.append(ubication_name)
+            if zona_info: name_parts.append(zona_info)
+
+            project.name = " - ".join(part for part in name_parts if part)
+
     # 2. Onchange para la Localidad
     @api.onchange('ubication_id')
     def _onchange_ubication_id(self):
