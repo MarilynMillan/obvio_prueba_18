@@ -142,20 +142,40 @@ class ProjectProject(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            is_template = vals.get('is_template')
-            # 🔸 Si es plantilla, marcar 'sequence' como 'TEMPLATE' y no generar correlativo
-            if is_template:
+            # --- 1. LÓGICA DE PLANTILLA ---
+            if vals.get('is_template'):
                 vals['sequence_new'] = 'TEMPLATE'
+                vals['account_id'] = False
+
+                # --- BLINDAJE PARA DOCUMENTOS ---
+                # Esto evita que Odoo Enterprise Documents cree el workspace
+                # y bloquee el autovacuum después.
+                vals['use_documents'] = False
+                vals['documents_folder_id'] = False
+
+            # --- 2. DETERMINAR EL CORRELATIVO ---
+            elif vals.get('is_subproject') and vals.get('parent_project_id'):
+                parent = self.env['project.project'].browse(vals['parent_project_id'])
+                suffix = vals.get('subproject_suffix', '').strip()
+
+                if parent.sequence_new and parent.sequence_new != 'TEMPLATE':
+                    base_sequence = parent.sequence_new
+                    parts = base_sequence.split(' ')
+                    if parts and parts[-1].isalpha() and len(parts[-1]) <= 2:
+                        base_sequence = ' '.join(parts[:-1])
+                    vals['sequence_new'] = f"{base_sequence} {suffix}" if suffix else base_sequence
+                else:
+                    vals['sequence_new'] = self.env['ir.sequence'].next_by_code('project.project') or '/'
+
             else:
-                # 🔹 Si no tiene correlativo (nuevo proyecto), generarlo
                 if not vals.get('sequence_new') or vals['sequence_new'] in ['New', '/', False]:
                     vals['sequence_new'] = self.env['ir.sequence'].next_by_code('project.project') or '/'
 
-            # Guardar el nombre original del usuario y asignarlo también a name_copy
+            # --- 3. NOMENCLATURA (Se mantiene tu lógica intacta) ---
             vals['original_name'] = vals.get('name', '')
             vals['name_copy'] = vals.get('name', '')
 
-            # Obtener datos para la nomenclatura
+            # Búsquedas de alias
             type_project_alias = self.env['type.project'].browse(vals.get('type_project', False)).alias_name or ''
             partner_alias = self.env['res.partner'].browse(vals.get('partner_id', False)).alias_name or ''
             operator_code = self.env['res.partner'].browse(vals.get('partner_operator_id', False)).codigo_operator or ''
@@ -164,39 +184,39 @@ class ProjectProject(models.Model):
             ubication_name = self.env['zone.ubication'].browse(vals.get('ubication_id', False)).zone or ''
             project_name_short = vals['name_copy']
 
-            if is_template:
+            if vals.get('is_template'):
                 vals['name'] = "TEMPLATE - " + (project_name_short or vals.get('original_name') or '')
             else:
-                # Construir el nombre completo en orden fijo
                 name_parts = [vals['sequence_new']]
-                if type_project_alias:
-                    name_parts.append(type_project_alias)
-                if partner_alias:
-                    name_parts.append(partner_alias)
-                if project_name_short:
-                    name_parts.append(project_name_short)
-                #if partner_alias:
-                    #name_parts.append(partner_alias)
-                if operator_code:
-                    name_parts.append(operator_code)
-                if tienda_name:
-                    name_parts.append(tienda_name)
-                if ubication_name:
-                    name_parts.append(ubication_name)
-                if zona_info:
-                    name_parts.append(zona_info)
+                if type_project_alias: name_parts.append(type_project_alias)
+                if partner_alias: name_parts.append(partner_alias)
+                if project_name_short: name_parts.append(project_name_short)
+                if operator_code: name_parts.append(operator_code)
+                if tienda_name: name_parts.append(tienda_name)
+                if ubication_name: name_parts.append(ubication_name)
+                if zona_info: name_parts.append(zona_info)
 
                 vals['name'] = " - ".join(part for part in name_parts if part)
 
         # Crear proyectos
         projects = super(ProjectProject, self).create(vals_list)
 
-        # Post-creación: actualizar cuenta analítica y copiar tareas si aplica
+        # --- 4. POST-CREACIÓN ---
         for vals, project in zip(vals_list, projects):
+            if project.is_template:
+                # Doble validación: aseguramos que no quede cuenta ni documentos
+                project.write({
+                    'account_id': False,
+                    'use_documents': False,
+                    'documents_folder_id': False
+                })
+                continue
+
+            # Actualizar nombre de cuenta analítica (proyectos normales)
             if project.account_id:
                 project.account_id.name = project.name
 
-            # Copiar tareas desde plantilla si aplica
+            # Copiar tareas si viene de una plantilla
             if vals.get('template_project_id'):
                 template_project = self.env['project.project'].browse(vals['template_project_id'])
                 if template_project:
@@ -211,87 +231,96 @@ class ProjectProject(models.Model):
                         })
         return projects
 
-
-
     def unlink(self):
         return super(ProjectProject, self.with_context(is_unlinking_parent=True)).unlink()
 
     def write(self, vals):
+
+        protected_fields = [
+            'operation', 'zona_id', 'ubication_id', 'tienda_id',
+            'type_project', 'partner_id', 'partner_operator_id'
+        ]
+
+        # Validar seguridad solo si el usuario NO es manager.
+        # El responsable del proyecto puede editar campos críticos en sus propios proyectos.
+        if not self.env.user.has_group('project.group_project_manager'):
+            current_user = self.env.user
+            for project in self:
+                # Si el proyecto NO es plantilla y intentan cambiar un campo protegido
+                if (
+                    not project.is_template
+                    and any(f in vals for f in protected_fields)
+                    and project.user_id != current_user
+                ):
+                    raise UserError(_("You cannot modify critical fields in an active project. Contact a Manager."))
+
+        # Evitar que se asigne una cuenta si el proyecto se marca como plantilla
+        if vals.get('is_template'):
+            vals['account_id'] = False
+            vals['sequence_new'] = 'TEMPLATE'
+
         res = super(ProjectProject, self).write(vals)
 
         campos_nomenclatura = [
-            'type_project',
-            'partner_id',
-            'partner_operator_id',
-            'zona_id',
-            'tienda_id',
-            'ubication_id',
-            'name_copy',
+            'type_project', 'partner_id', 'partner_operator_id', 'zona_id',
+            'tienda_id', 'ubication_id', 'name_copy', 'is_subproject',
+            'parent_project_id', 'subproject_suffix'
         ]
 
         if any(campo in vals for campo in campos_nomenclatura):
             for project in self:
                 is_template = vals.get('is_template', project.is_template)
-                project_name_short = project.name_copy or project.original_name
-
-                # 🔹 Usar el correlativo correcto
-                sequence_new = vals.get('sequence_new', project.sequence_new) or ''
-
-                # 🔹 Obtener los alias/valores actualizados
-                type_project_alias = self.env['type.project'].browse(vals.get('type_project', project.type_project.id)).alias_name or ''
-                partner_alias = self.env['res.partner'].browse(vals.get('partner_id', project.partner_id.id)).alias_name or ''
-                operator_code = self.env['res.partner'].browse(vals.get('partner_operator_id', project.partner_operator_id.id)).codigo_operator or ''
-                zona_info = self.env['project.zone'].browse(vals.get('zona_id', project.zona_id.id)).code or ''
-                tienda_name = self.env['zone.tienda'].browse(vals.get('tienda_id', project.tienda_id.id)).tienda or ''
-                ubication_name = self.env['zone.ubication'].browse(vals.get('ubication_id', project.ubication_id.id)).zone or ''
 
                 if is_template:
-                    new_name = "TEMPLATE - " + (project_name_short or project.original_name or '')
-                else:
-                    # 🔹 Reconstruir el nombre completo con el correlativo (como en create)
-                    name_parts = [sequence_new]
-                    if type_project_alias:
-                        name_parts.append(type_project_alias)
-                    if partner_alias:
-                        name_parts.append(partner_alias)
-                    if project_name_short:
-                        name_parts.append(project_name_short)
-                    if operator_code:
-                        name_parts.append(operator_code)
-                    if tienda_name:
-                        name_parts.append(tienda_name)
-                    if ubication_name:
-                        name_parts.append(ubication_name)
-                    if zona_info:
-                        name_parts.append(zona_info)
+                    # Renombramos con el formato de plantilla
+                    project_name_short = project.name_copy or project.original_name
+                    new_name = "TEMPLATE - " + (project_name_short or '')
+                    if new_name != project.name:
+                        super(ProjectProject, project).write({'name': new_name})
+                    continue
 
-                    new_name = " - ".join(part for part in name_parts if part)
+                sequence_new = project.sequence_new
+                is_subproject = vals.get('is_subproject', getattr(project, 'is_subproject', False))
 
-                if new_name != project.name:
-                    super(ProjectProject, project).write({'name': new_name})
+                if is_subproject:
+                    parent_id = vals.get('parent_project_id', getattr(project, 'parent_project_id', False))
+                    if hasattr(parent_id, 'id'):
+                        parent_id = parent_id.id
 
-                    # 🔹 Actualizar analítica y documentos
-                    if project.account_id:
-                        project.account_id.name = new_name
-                    if hasattr(project, 'documents_folder_id') and project.documents_folder_id:
-                        project.documents_folder_id.name = new_name
+                    suffix = vals.get('subproject_suffix', getattr(project, 'subproject_suffix', '') or '').strip()
+                    if parent_id:
+                        parent = self.env['project.project'].browse(parent_id)
+                        if parent.sequence_new and parent.sequence_new != 'TEMPLATE':
+                            base_seq = parent.sequence_new
+                            parts = base_seq.split(' ')
+                            if parts and parts[-1].isalpha() and len(parts[-1]) <= 2:
+                                base_seq = ' '.join(parts[:-1])
+                            sequence_new = f"{base_seq} {suffix}" if suffix else base_seq
 
-        # 🔹 Copiar tareas desde plantilla (sin cambios)
-        if 'template_project_id' in vals and vals['template_project_id']:
-            template_project = self.env['project.project'].browse(vals['template_project_id'])
-            if template_project:
-                for project in self:
-                    if not project.task_ids:
-                        for task in template_project.task_ids:
-                            task.with_context(copy_project=True).copy({
-                                'project_id': project.id,
-                                'name': task.name,
-                                'stage_id': task.stage_id.id,
-                                'tag_ids': [(6, 0, task.tag_ids.ids)],
-                                'user_ids': [(6, 0, task.user_ids.ids)],
-                                'sequence': task.sequence,
-                            })
+                # Reconstrucción de nombre (tu lógica original)
+                type_alias = self.env['type.project'].browse(vals.get('type_project', project.type_project.id)).alias_name or ''
+                partner_alias = self.env['res.partner'].browse(vals.get('partner_id', project.partner_id.id)).alias_name or ''
+                op_code = self.env['res.partner'].browse(vals.get('partner_operator_id', project.partner_operator_id.id)).codigo_operator or ''
+                z_info = self.env['project.zone'].browse(vals.get('zona_id', project.zona_id.id)).code or ''
+                t_name = self.env['zone.tienda'].browse(vals.get('tienda_id', project.tienda_id.id)).tienda or ''
+                u_name = self.env['zone.ubication'].browse(vals.get('ubication_id', project.ubication_id.id)).zone or ''
+                p_short = project.name_copy or project.original_name
 
+                name_parts = [sequence_new]
+                if type_alias: name_parts.append(type_alias)
+                if partner_alias: name_parts.append(partner_alias)
+                if p_short: name_parts.append(p_short)
+                if op_code: name_parts.append(op_code)
+                if t_name: name_parts.append(t_name)
+                if u_name: name_parts.append(u_name)
+                if z_info: name_parts.append(z_info)
+
+                new_name = " - ".join(part for part in name_parts if part)
+
+                super(ProjectProject, project).write({'name': new_name, 'sequence_new': sequence_new})
+
+                if getattr(project, 'account_id', False):
+                    project.account_id.name = new_name
         return res
 
     def create_maintenance_equipment(self):
