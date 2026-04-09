@@ -1,7 +1,6 @@
 from odoo import _, api, models
 from odoo.exceptions import AccessError
 
-
 class DocumentsDocument(models.Model):
     _inherit = "documents.document"
 
@@ -19,24 +18,27 @@ class DocumentsDocument(models.Model):
         )
 
     def _can_manage_project_related_record(self, model_name, res_id, user):
+        if not model_name or not res_id:
+            return False
         if model_name not in self._PROJECT_GUARDED_MODELS:
-            return True
-        if not res_id:
             return False
 
         record = self.env[model_name].sudo().browse(res_id).exists()
         if not record:
             return False
+
+        # Validación por responsabilidad de proyecto
         if model_name == "project.project":
             return record.user_id == user
         if model_name == "project.task":
             return record.project_id.user_id == user
-        return record.project_id.user_id == user
+        if hasattr(record, 'project_id'):
+            return record.project_id.user_id == user
+        return False
 
     def _get_target_model_res_id_from_vals(self, vals, record=None):
         model_name = vals.get("res_model") if vals else None
         res_id = vals.get("res_id") if vals else None
-
         if record:
             model_name = model_name if model_name is not None else record.res_model
             res_id = res_id if res_id is not None else record.res_id
@@ -49,57 +51,56 @@ class DocumentsDocument(models.Model):
 
         return model_name, res_id
 
-    def _check_project_user_documents_guard(self, vals_list=None, records=None):
-        if not self._is_project_user_restricted():
-            return
-
-        user = self.env.user
-        if vals_list:
-            for vals in vals_list:
-                model_name, res_id = self._get_target_model_res_id_from_vals(vals)
-                if model_name in self._PROJECT_GUARDED_MODELS and not self._can_manage_project_related_record(
-                    model_name, res_id, user
-                ):
-                    raise AccessError(
-                        _(
-                            "You can only manage documents on project records where you are the project responsible."
-                        )
-                    )
-
-        if records:
-            for record in records:
-                model_name, res_id = self._get_target_model_res_id_from_vals({}, record=record)
-                if model_name in self._PROJECT_GUARDED_MODELS and not self._can_manage_project_related_record(
-                    model_name, res_id, user
-                ):
-                    raise AccessError(
-                        _(
-                            "You can only manage documents on project records where you are the project responsible."
-                        )
-                    )
-
     @api.model_create_multi
     def create(self, vals_list):
-        self._check_project_user_documents_guard(vals_list=vals_list)
+        if self._is_project_user_restricted():
+            user = self.env.user
+            for vals in vals_list:
+                model_name, res_id = self._get_target_model_res_id_from_vals(vals)
+                if model_name in self._PROJECT_GUARDED_MODELS:
+                    if not self._can_manage_project_related_record(model_name, res_id, user):
+                        raise AccessError(_("No puedes crear documentos en proyectos que no gestionas."))
         return super().create(vals_list)
 
     def write(self, vals):
         if self._is_project_user_restricted():
             user = self.env.user
-            for record in self:
-                model_name, res_id = self._get_target_model_res_id_from_vals(vals, record=record)
-                if model_name in self._PROJECT_GUARDED_MODELS and not self._can_manage_project_related_record(
-                    model_name, res_id, user
-                ):
-                    raise AccessError(
-                        _(
-                            "You can only manage documents on project records where you are the project responsible."
-                        )
-                    )
-        return super().write(vals)
+            my_records = self.filtered(lambda r: r.owner_id == user)
+            others_records = self - my_records
+
+            res = True
+            if my_records:
+                res = super(DocumentsDocument, my_records).write(vals)
+
+            if others_records:
+                for record in others_records:
+                    model_name, res_id = self._get_target_model_res_id_from_vals(vals, record=record)
+                    if not self._can_manage_project_related_record(model_name, res_id, user):
+                        raise AccessError(_("No puedes modificar, mover ni renombrar carpetas o archivos de otros usuarios que no gestionas."))
+
+                res = super(DocumentsDocument, others_records).write(vals) and res
+
+            return res
+
+        return super(DocumentsDocument, self).write(vals)
+
+    def _check_access(self, operation):
+        if self.env.user.has_group("project.group_project_user") and not self.env.user.has_group("project.group_project_manager"):
+            return
+
+        if hasattr(super(DocumentsDocument, self), '_check_access'):
+            return super(DocumentsDocument, self)._check_access(operation)
+        return None
 
     def unlink(self):
-        self._check_project_user_documents_guard(records=self)
+        if self._is_project_user_restricted():
+            user = self.env.user
+            for record in self:
+                if record.owner_id == user:
+                    continue
+                model_name, res_id = self._get_target_model_res_id_from_vals({}, record=record)
+                if not self._can_manage_project_related_record(model_name, res_id, user):
+                    raise AccessError(_("No tienes permisos para eliminar documentos o carpetas de terceros."))
         return super().unlink()
 
 
