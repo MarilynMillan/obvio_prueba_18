@@ -4,11 +4,22 @@
         <record id="rule_documents_project_user_scoped_read" model="ir.rule">
             <field name="name">Project Documents Scoped Read</field>
             <field name="model_id" ref="documents.model_documents_document"/>
-            <field name="domain_force">['|', ('owner_id', '=', user.id), ('project_id', 'in', user.project_security_visible_project_ids.ids)]</field>
+            <field name="domain_force">['|', '|', ('type', '=', 'folder'), ('owner_id', '=', user.id), ('project_id', 'in', user.project_security_visible_project_ids.ids)]</field>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="False"/>
             <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        </record>
+
+        <record id="rule_documents_project_user_scoped_write" model="ir.rule">
+            <field name="name">Project Documents Scoped Write</field>
+            <field name="model_id" ref="documents.model_documents_document"/>
+            <field name="domain_force">[('owner_id', '=', user.id)]</field>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
             <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
         </record>
 
