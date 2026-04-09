@@ -1,0 +1,38 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* project_security_roles_timesheet
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-24 17:45+0000\n"
+"PO-Revision-Date: 2026-03-24 17:45+0000\n"
+"Last-Translator: \n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#. module: project_security_roles_timesheet
+#. odoo-python
+#: code:addons/project_security_roles_timesheet/models/project_timesheet_guard.py:0
+msgid "You can only manage timesheets on projects where you are the responsible."
+msgstr "Solo puedes gestionar partes de horas en proyectos donde eres el responsable."
+
+#. module: project_security_roles_timesheet
+#: model:ir.rule,name:project_security_roles_timesheet.rule_timesheet_project_user_own_manage
+msgid "Own Project Timesheets Manage"
+msgstr "Gestionar partes de horas de proyectos propios"
+
+#. module: project_security_roles_timesheet
+#: model:ir.rule,name:project_security_roles_timesheet.rule_timesheet_project_user_scoped_read
+msgid "Project Timesheets Scoped Read"
+msgstr "Lectura acotada de partes de horas de proyecto"
+
+#. module: project_security_roles_timesheet
+#: model:ir.rule,name:project_security_roles_timesheet.rule_timesheet_report_project_user_scoped_read
+msgid "Project Timesheets Report Scoped Read"
+msgstr "Lectura acotada del reporte de partes de horas de proyecto"

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Keep default hr_timesheet behavior for non-project users/managers, but scope Project/User writes to owned projects only. -->
+        <function model="ir.rule" name="write">
+            <value model="ir.rule" search="[('id', '=', ref('hr_timesheet.timesheet_line_rule_user'))]"/>
+            <value eval="{
+                'domain_force': &quot;(not user.has_group('project.group_project_user') or user.has_group('project.group_project_manager')) and [('user_id', '=', user.id), ('project_id', '!=', False), '|', ('project_id.privacy_visibility', '!=', 'followers'), ('message_partner_ids', 'in', [user.partner_id.id])] or [('project_id.user_id', '=', user.id)]&quot;
+            }"/>
+        </function>
+
+        <function model="ir.rule" name="write">
+            <value model="ir.rule" search="[('id', '=', ref('hr_timesheet.timesheet_line_rule_approver'))]"/>
+            <value eval="{
+                'domain_force': &quot;(not user.has_group('project.group_project_user') or user.has_group('project.group_project_manager')) and [('project_id', '!=', False), '|', '|', ('project_id.privacy_visibility', '!=', 'followers'), ('project_id.message_partner_ids', 'in', [user.partner_id.id]), ('task_id.message_partner_ids', 'in', [user.partner_id.id])] or [('project_id.user_id', '=', user.id)]&quot;
+            }"/>
+        </function>
+
+        <function model="ir.rule" name="write">
+            <value model="ir.rule" search="[('id', '=', ref('hr_timesheet.timesheet_line_rule_manager'))]"/>
+            <value eval="{
+                'domain_force': &quot;(not user.has_group('project.group_project_user') or user.has_group('project.group_project_manager')) and [('project_id', '!=', False)] or [('project_id.user_id', '=', user.id)]&quot;
+            }"/>
+        </function>
+
+        <function model="ir.rule" name="write">
+            <value model="ir.rule" search="[('id', '=', ref('hr_timesheet.timesheet_analysis_report_user'))]"/>
+            <value eval="{
+                'domain_force': &quot;(not user.has_group('project.group_project_user') or user.has_group('project.group_project_manager')) and [('user_id', '=', user.id), '|', ('project_id.privacy_visibility', '!=', 'followers'), ('message_partner_ids', 'in', [user.partner_id.id])] or [('project_id.user_id', '=', user.id)]&quot;
+            }"/>
+        </function>
+
+        <function model="ir.rule" name="write">
+            <value model="ir.rule" search="[('id', '=', ref('hr_timesheet.timesheet_analysis_report_approver'))]"/>
+            <value eval="{
+                'domain_force': &quot;(not user.has_group('project.group_project_user') or user.has_group('project.group_project_manager')) and ['|', '|', ('project_id.privacy_visibility', '!=', 'followers'), ('project_id.message_partner_ids', 'in', [user.partner_id.id]), ('task_id.message_partner_ids', 'in', [user.partner_id.id])] or [('project_id.user_id', '=', user.id)]&quot;
+            }"/>
+        </function>
+
+        <function model="ir.rule" name="write">
+            <value model="ir.rule" search="[('id', '=', ref('hr_timesheet.timesheet_analysis_report_manager'))]"/>
+            <value eval="{
+                'domain_force': &quot;(not user.has_group('project.group_project_user') or user.has_group('project.group_project_manager')) and [(1, '=', 1)] or [('project_id.user_id', '=', user.id)]&quot;
+            }"/>
+        </function>
+
+        <record id="rule_timesheet_project_user_scoped_read" model="ir.rule">
+            <field name="name">Project Timesheets Scoped Read</field>
+            <field name="model_id" ref="analytic.model_account_analytic_line"/>
+            <field name="domain_force">['|', '|', ('project_id.user_id', '=', user.id), ('project_id.message_partner_ids', 'in', [user.partner_id.id]), ('project_id.collaborator_ids.partner_id', '=', user.partner_id.id)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        </record>
+
+        <record id="rule_timesheet_project_user_own_manage" model="ir.rule">
+            <field name="name">Own Project Timesheets Manage</field>
+            <field name="model_id" ref="analytic.model_account_analytic_line"/>
+            <field name="domain_force">[('project_id.user_id', '=', user.id)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+            <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        </record>
+
+        <record id="rule_timesheet_report_project_user_scoped_read" model="ir.rule">
+            <field name="name">Project Timesheets Report Scoped Read</field>
+            <field name="model_id" ref="hr_timesheet.model_timesheets_analysis_report"/>
+            <field name="domain_force">['|', '|', ('project_id.user_id', '=', user.id), ('project_id.message_partner_ids', 'in', [user.partner_id.id]), ('project_id.collaborator_ids.partner_id', '=', user.partner_id.id)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        </record>
+    </data>
+</odoo>

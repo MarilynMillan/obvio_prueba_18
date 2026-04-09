@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Restrict standard employee-level visibility so Project/User rules can be effective. -->
+        <function model="ir.rule" name="write">
+            <value model="ir.rule" search="[('id', '=', ref('project.task_visibility_rule_project_user'))]"/>
+            <value eval="{
+                'domain_force': &quot;['|', '|', '|', ('project_id.user_id', '=', user.id), ('user_ids', 'in', user.id), ('project_id.message_partner_ids', 'in', [user.partner_id.id]), ('project_id.collaborator_ids.partner_id', '=', user.partner_id.id)]&quot;,
+                'perm_read': True,
+                'perm_write': False,
+                'perm_create': False,
+                'perm_unlink': False
+            }"/>
+        </function>
+        <!-- Also patch the equivalent rule introduced by project_todo when present. -->
+        <function model="ir.rule" name="write">
+            <value model="ir.rule" search="[
+                ('model_id', '=', ref('project.model_project_task')),
+                ('name', '=', 'Project/Task: project users: follow required for follower-only projects'),
+                ('groups', 'in', [ref('project.group_project_user')])
+            ]"/>
+            <value eval="{
+                'domain_force': &quot;['|', '|', '|', ('project_id.user_id', '=', user.id), ('user_ids', 'in', user.id), ('project_id.message_partner_ids', 'in', [user.partner_id.id]), ('project_id.collaborator_ids.partner_id', '=', user.partner_id.id)]&quot;,
+                'perm_read': True,
+                'perm_write': False,
+                'perm_create': False,
+                'perm_unlink': False
+            }"/>
+        </function>
+
+        <function model="ir.rule" name="write">
+            <value model="ir.rule" search="[('id', '=', ref('project.task_visibility_rule'))]"/>
+            <value eval="{
+                'domain_force': &quot;['|', '|', '|', ('project_id.user_id', '=', user.id), ('user_ids', 'in', user.id), ('project_id.message_partner_ids', 'in', [user.partner_id.id]), ('project_id.collaborator_ids.partner_id', '=', user.partner_id.id)]&quot;,
+                'perm_read': True,
+                'perm_write': False,
+                'perm_create': False,
+                'perm_unlink': False
+            }"/>
+        </function>
+
+        <function model="ir.rule" name="write">
+            <value model="ir.rule" search="[('id', '=', ref('project.ir_rule_private_task'))]"/>
+            <value eval="{
+                'domain_force': &quot;['|', '|', '|', ('project_id.user_id', '=', user.id), ('user_ids', 'in', user.id), ('project_id.message_partner_ids', 'in', [user.partner_id.id]), ('project_id.collaborator_ids.partner_id', '=', user.partner_id.id)]&quot;,
+                'perm_read': True,
+                'perm_write': False,
+                'perm_create': False,
+                'perm_unlink': False
+            }"/>
+        </function>
+
+        <function model="ir.rule" name="write">
+            <value model="ir.rule" search="[('id', '=', ref('project.task_type_own_write_rule'))]"/>
+            <value eval="{
+                'domain_force': &quot;['|', ('user_id', '=', user.id), ('project_ids.user_id', '=', user.id)]&quot;,
+                'perm_read': False,
+                'perm_write': True,
+                'perm_create': True,
+                'perm_unlink': True
+            }"/>
+        </function>
+
+        <function model="ir.rule" name="write">
+            <value model="ir.rule" search="[('id', '=', ref('project.task_type_visibility_rule'))]"/>
+            <value eval="{
+                'domain_force': &quot;['|', '|', '|', '|', ('user_id', 'in', (False, user.id)), ('project_ids', '=', False), ('project_ids.user_id', '=', user.id), ('project_ids.message_partner_ids', 'in', [user.partner_id.id]), ('project_ids.collaborator_ids.partner_id', '=', user.partner_id.id)]&quot;,
+                'perm_read': True,
+                'perm_write': False,
+                'perm_create': False,
+                'perm_unlink': False
+            }"/>
+        </function>
+
+        <record id="rule_task_type_user_create" model="ir.rule">
+            <field name="name">Own Project Task Stages Create</field>
+            <field name="model_id" ref="project.model_project_task_type"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        </record>
+
+        <function model="ir.rule" name="write">
+            <value model="ir.rule" search="[('id', '=', ref('project.milestone_visibility_rule'))]"/>
+            <value eval="{'perm_write': False, 'perm_create': False, 'perm_unlink': False}"/>
+        </function>
+
+        <function model="ir.rule" name="write">
+            <value model="ir.rule" search="[('id', '=', ref('project.project_public_members_rule'))]"/>
+            <value eval="{
+                'domain_force': &quot;['|', '|', ('user_id', '=', user.id), ('message_partner_ids', 'in', [user.partner_id.id]), ('collaborator_ids.partner_id', '=', user.partner_id.id)]&quot;,
+                'perm_read': True,
+                'perm_write': False,
+                'perm_create': False,
+                'perm_unlink': False
+            }"/>
+        </function>
+
+        <function model="ir.rule" name="write">
+            <value model="ir.rule" search="[('id', '=', ref('project.update_visibility_rule'))]"/>
+            <value eval="{'perm_read': True, 'perm_write': False, 'perm_create': False, 'perm_unlink': False}"/>
+        </function>
+
+        <function model="ir.rule" name="write">
+            <value model="ir.rule" search="[('id', '=', ref('project.update_comp_rule'))]"/>
+            <value eval="{'perm_read': True, 'perm_write': False, 'perm_create': False, 'perm_unlink': False}"/>
+        </function>
+
+        <function model="ir.rule" name="write">
+            <value model="ir.rule" search="[('id', '=', ref('project.report_project_task_user_rule'))]"/>
+            <value eval="{
+                'domain_force': &quot;['|', '|', '|', ('project_id.user_id', '=', user.id), ('user_ids', 'in', user.id), ('project_id.message_partner_ids', 'in', [user.partner_id.id]), ('project_id.collaborator_ids.partner_id', '=', user.partner_id.id)]&quot;
+            }"/>
+        </function>
+
+        <function model="ir.rule" name="write">
+            <value model="ir.rule" search="[('id', '=', ref('project.burndown_chart_project_user_rule'))]"/>
+            <value eval="{
+                'domain_force': &quot;['|', '|', '|', ('project_id.user_id', '=', user.id), ('user_ids', 'in', user.id), ('project_id.message_partner_ids', 'in', [user.partner_id.id]), ('project_id.collaborator_ids.partner_id', '=', user.partner_id.id)]&quot;
+            }"/>
+        </function>
+
+        <record id="project.update_comp_rule" model="ir.rule">
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_project_user_own_edit" model="ir.rule">
+            <field name="name">Own Projects Edit</field>
+            <field name="model_id" ref="project.model_project_project"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+            <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        </record>
+
+        <record id="rule_project_user_follower_read" model="ir.rule">
+            <field name="name">Follower Projects Read</field>
+            <field name="model_id" ref="project.model_project_project"/>
+            <field name="domain_force">[('message_partner_ids', 'in', [user.partner_id.id])]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        </record>
+
+        <record id="rule_project_user_team_read" model="ir.rule">
+            <field name="name">Team Projects Read</field>
+            <field name="model_id" ref="project.model_project_project"/>
+            <field name="domain_force">[('collaborator_ids.partner_id', '=', user.partner_id.id)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        </record>
+
+        <record id="rule_task_user_own_edit" model="ir.rule">
+            <field name="name">Own Tasks Edit</field>
+            <field name="model_id" ref="project.model_project_task"/>
+            <field name="domain_force">[('project_id.user_id', '=', user.id)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+            <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        </record>
+
+        <record id="rule_task_user_assigned_write" model="ir.rule">
+            <field name="name">Assigned Tasks Write</field>
+            <field name="model_id" ref="project.model_project_task"/>
+            <field name="domain_force">[('user_ids', 'in', user.id)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        </record>
+
+        <record id="rule_milestone_user_own_edit" model="ir.rule">
+            <field name="name">Own Milestones Edit</field>
+            <field name="model_id" ref="project.model_project_milestone"/>
+            <field name="domain_force">[('project_id.user_id', '=', user.id)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+            <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        </record>
+
+        <record id="rule_project_update_user_own_edit" model="ir.rule">
+            <field name="name">Own Project Updates Edit</field>
+            <field name="model_id" ref="project.model_project_update"/>
+            <field name="domain_force">[('project_id.user_id', '=', user.id)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+            <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        </record>
+
+        <record id="rule_project_update_user_follower_read" model="ir.rule">
+            <field name="name">Follower Project Updates Read</field>
+            <field name="model_id" ref="project.model_project_update"/>
+            <field name="domain_force">[('project_id.message_partner_ids', 'in', [user.partner_id.id])]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        </record>
+
+        <record id="rule_project_update_user_team_read" model="ir.rule">
+            <field name="name">Team Project Updates Read</field>
+            <field name="model_id" ref="project.model_project_update"/>
+            <field name="domain_force">[('project_id.collaborator_ids.partner_id', '=', user.partner_id.id)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        </record>
+
+    </data>
+</odoo>

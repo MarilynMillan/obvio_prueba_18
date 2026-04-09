@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_task_kanban_inherited_security_roles" model="ir.ui.view">
+        <field name="name">project.enterprise.task.kanban.security.roles</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project_enterprise.view_task_kanban_inherited"/>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban" position="attributes">
+                <attribute name="js_class">project_security_roles_task_kanban</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>
