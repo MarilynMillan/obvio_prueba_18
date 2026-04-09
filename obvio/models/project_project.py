@@ -203,7 +203,7 @@ class ProjectProject(models.Model):
                             'stage_id': task.stage_id.id,
                             'sequence': task.sequence,
                             'tag_ids': [(6, 0, task.tag_ids.ids)],
-                            'user_ids': [(6, 0, [self.env.uid])],
+                            'user_ids': [(6, 0, task.user_ids.ids)],
                         })
         return projects
 
@@ -277,7 +277,7 @@ class ProjectProject(models.Model):
                                 'name': task.name,
                                 'stage_id': task.stage_id.id,
                                 'tag_ids': [(6, 0, task.tag_ids.ids)],
-                                'user_ids': [(6, 0, [self.env.uid])],
+                                'user_ids': [(6, 0, task.user_ids.ids)],
                                 'sequence': task.sequence,
                             })
 

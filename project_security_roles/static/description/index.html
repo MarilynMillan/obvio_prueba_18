@@ -1,0 +1,86 @@
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <div class="col-md-12">
+            <h2>documentacion funcional de reglas de permisos (proyecto)</h2>
+            <p>Este documento resume, en lenguaje funcional, las reglas creadas para usuarios de tipo <strong>Project / User</strong> y su alcance por modulo.</p>
+        </div>
+    </div>
+
+    <div class="oe_row oe_spaced">
+        <div class="col-md-12">
+            <h2>1. regla base en proyectos</h2>
+            <p><strong>Modulo asociado:</strong> <code>project_security_roles</code></p>
+            <ul>
+                <li><strong>Own Projects Edit:</strong> permite administrar solo los proyectos donde el usuario es responsable.</li>
+                <li><strong>Follower Projects Read:</strong> permite ver proyectos donde el usuario es seguidor, sin capacidad de edicion.</li>
+                <li><strong>Team Projects Read:</strong> permite ver proyectos por criterio de team, sin capacidad de edicion.</li>
+            </ul>
+            <p>Reglas funcionales relacionadas:</p>
+            <ul>
+                <li><strong>Own Tasks Edit:</strong> administra tareas de sus propios proyectos.</li>
+                <li><strong>Assigned Tasks Write:</strong> puede gestionar tareas en las que esta asignado.</li>
+                <li><strong>Own Milestones Edit:</strong> administra hitos de sus propios proyectos.</li>
+                <li><strong>Own Project Updates Edit:</strong> administra objetivos/actualizaciones de sus propios proyectos.</li>
+                <li><strong>Follower Project Updates Read:</strong> lectura de objetivos/actualizaciones en proyectos seguidos.</li>
+                <li><strong>Team Project Updates Read:</strong> lectura de objetivos/actualizaciones por criterio de team.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="oe_row oe_spaced">
+        <div class="col-md-12">
+            <h2>2. reglas para documentos de proyecto</h2>
+            <p><strong>Modulo asociado:</strong> <code>project_security_roles_documents</code></p>
+            <ul>
+                <li><strong>Project Documents Scoped Read:</strong> permite ver documentos de proyectos visibles para el usuario, sin editar.</li>
+                <li><strong>Project Documents Manager Full Read:</strong> mantiene lectura total para Project Manager.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="oe_row oe_spaced">
+        <div class="col-md-12">
+            <h2>3. reglas para forecast (planificacion)</h2>
+            <p><strong>Modulo asociado:</strong> <code>project_security_roles_forecast</code></p>
+            <ul>
+                <li>El usuario administra forecast solo en proyectos propios.</li>
+                <li>El usuario ve forecast en proyectos que sigue o donde aplica criterio de team.</li>
+                <li>La lectura de plantillas de forecast sigue el mismo alcance funcional.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="oe_row oe_spaced">
+        <div class="col-md-12">
+            <h2>4. reglas para timesheets</h2>
+            <p><strong>Modulo asociado:</strong> <code>project_security_roles_timesheet</code></p>
+            <ul>
+                <li><strong>Own Project Timesheets Manage:</strong> administra horas solo en proyectos propios.</li>
+                <li><strong>Project Timesheets Scoped Read:</strong> ve horas en proyectos propios, seguidos o de team.</li>
+                <li><strong>Project Timesheets Report Scoped Read:</strong> aplica el mismo criterio al reporte de horas.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="oe_row oe_spaced">
+        <div class="col-md-12">
+            <h2>5. reglas para reporte timesheet + forecast</h2>
+            <p><strong>Modulo asociado:</strong> <code>project_security_roles_timesheet_forecast</code></p>
+            <ul>
+                <li><strong>Project Timesheet Forecast Report Scoped Read:</strong> permite ver el analisis combinado solo para proyectos propios, seguidos o de team.</li>
+                <li><strong>Project Timesheet Forecast Report Manager Full Read:</strong> mantiene lectura completa para Project Manager.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="oe_row oe_spaced">
+        <div class="col-md-12">
+            <h2>resultado funcional esperado</h2>
+            <ul>
+                <li>Un usuario <strong>Project / User</strong> administra solo lo propio.</li>
+                <li>Puede ver informacion de proyectos seguidos y de team en modo lectura.</li>
+                <li>Un <strong>Project Manager</strong> conserva visibilidad completa.</li>
+            </ul>
+        </div>
+    </div>
+</section>

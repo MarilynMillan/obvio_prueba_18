@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_documents_document_project_user,documents.document.project.user,documents.model_documents_document,project.group_project_user,1,1,1,1
+access_documents_folder_project_user,documents.folder.project.user,documents.model_documents_folder,project.group_project_user,1,0,0,0

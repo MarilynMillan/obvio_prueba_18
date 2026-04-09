@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_planning_tree_project_user_send" model="ir.ui.view">
+        <field name="name">planning.slot.list.project.user.send</field>
+        <field name="model">planning.slot</field>
+        <field name="inherit_id" ref="planning.planning_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/button[@name='action_planning_publish_and_send']" position="attributes">
+                <attribute name="groups">planning.group_planning_manager,project.group_project_user</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_planning_form_project_user_send" model="ir.ui.view">
+        <field name="name">planning.slot.form.project.user.send</field>
+        <field name="model">planning.slot</field>
+        <field name="inherit_id" ref="planning.planning_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="(//header/button[@name='action_send'])[1]" position="attributes">
+                <attribute name="groups">planning.group_planning_manager,project.group_project_user</attribute>
+            </xpath>
+            <xpath expr="(//header/button[@name='action_send'])[2]" position="attributes">
+                <attribute name="groups">planning.group_planning_manager,project.group_project_user</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_planning_form_gantt_project_user_send" model="ir.ui.view">
+        <field name="name">planning.slot.form.gantt.project.user.send</field>
+        <field name="model">planning.slot</field>
+        <field name="inherit_id" ref="planning.planning_view_form_in_gantt"/>
+        <field name="arch" type="xml">
+            <xpath expr="(//footer/button[@name='action_send'])[1]" position="attributes">
+                <attribute name="groups">planning.group_planning_manager,project.group_project_user</attribute>
+            </xpath>
+            <xpath expr="(//footer/button[@name='action_send'])[2]" position="attributes">
+                <attribute name="groups">planning.group_planning_manager,project.group_project_user</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

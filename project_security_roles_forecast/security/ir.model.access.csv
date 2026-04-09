@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_planning_slot_project_user,planning.slot.project.user,planning.model_planning_slot,project.group_project_user,1,1,1,1
+access_planning_slot_template_project_user,planning.slot.template.project.user,planning.model_planning_slot_template,project.group_project_user,1,1,1,1
+access_planning_planning_project_user,planning.planning.project.user,planning.model_planning_planning,project.group_project_user,1,1,1,0
+access_planning_send_project_user,planning.send.project.user,planning.model_planning_send,project.group_project_user,1,1,1,0
