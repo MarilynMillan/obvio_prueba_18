@@ -6,7 +6,19 @@
             <field name="model_id" ref="documents.model_documents_document"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="perm_read" eval="True"/>
-            <field name="perm_write" eval="True"/> <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        </record>
+
+        <record id="rule_documents_project_user_own_write" model="ir.rule">
+            <field name="name">Project Documents: Own Document Write for PMs</field>
+            <field name="model_id" ref="documents.model_documents_document"/>
+            <field name="domain_force">['|', ('owner_id', '=', user.id), ('create_uid', '=', user.id)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
             <field name="perm_unlink" eval="True"/>
             <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
         </record>
