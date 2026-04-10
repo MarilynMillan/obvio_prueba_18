@@ -4,7 +4,7 @@
         <record id="rule_timesheet_forecast_report_project_user_scoped_read" model="ir.rule">
             <field name="name">Project Timesheet Forecast Report Scoped Read</field>
             <field name="model_id" ref="project_timesheet_forecast.model_project_timesheet_forecast_report_analysis"/>
-            <field name="domain_force">['|', '|', ('project_id.user_id', '=', user.id), ('project_id.message_partner_ids', 'in', [user.partner_id.id]), ('project_id.collaborator_ids.partner_id', '=', user.partner_id.id)]</field>
+            <field name="domain_force">[('project_id.user_id', '=', user.id)]</field>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="False"/>
