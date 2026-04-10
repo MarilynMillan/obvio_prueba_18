@@ -9,7 +9,7 @@
     'version': '18.0',
     'author': 'Ing.Marilynmillan',
     
-    'depends': ['base', 'maintenance','project','sale_project','account', 'analytic'],
+    'depends': ['base','maintenance','project','sale_project','account','analytic','documents','documents_project'],
     "data": [
         "security/ir.model.access.csv",
         "views/project_project_views.xml",

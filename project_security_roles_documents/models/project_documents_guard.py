@@ -18,89 +18,43 @@ class DocumentsDocument(models.Model):
             "project.group_project_manager"
         )
 
-    def _can_manage_project_related_record(self, model_name, res_id, user):
-        if model_name not in self._PROJECT_GUARDED_MODELS:
-            return True
-        if not res_id:
-            return False
-
-        record = self.env[model_name].sudo().browse(res_id).exists()
-        if not record:
-            return False
-        if model_name == "project.project":
-            return record.user_id == user
-        if model_name == "project.task":
-            return record.project_id.user_id == user
-        return record.project_id.user_id == user
-
-    def _get_target_model_res_id_from_vals(self, vals, record=None):
-        model_name = vals.get("res_model") if vals else None
-        res_id = vals.get("res_id") if vals else None
-
-        if record:
-            model_name = model_name if model_name is not None else record.res_model
-            res_id = res_id if res_id is not None else record.res_id
-
-        if (not model_name or not res_id) and vals and vals.get("attachment_id"):
-            attachment = self.env["ir.attachment"].sudo().browse(vals["attachment_id"]).exists()
-            if attachment:
-                model_name = model_name or attachment.res_model
-                res_id = res_id or attachment.res_id
-
-        return model_name, res_id
-
-    def _check_project_user_documents_guard(self, vals_list=None, records=None):
-        if not self._is_project_user_restricted():
-            return
-
-        user = self.env.user
-        if vals_list:
-            for vals in vals_list:
-                model_name, res_id = self._get_target_model_res_id_from_vals(vals)
-                if model_name in self._PROJECT_GUARDED_MODELS and not self._can_manage_project_related_record(
-                    model_name, res_id, user
-                ):
-                    raise AccessError(
-                        _(
-                            "You can only manage documents on project records where you are the project responsible."
-                        )
-                    )
-
-        if records:
-            for record in records:
-                model_name, res_id = self._get_target_model_res_id_from_vals({}, record=record)
-                if model_name in self._PROJECT_GUARDED_MODELS and not self._can_manage_project_related_record(
-                    model_name, res_id, user
-                ):
-                    raise AccessError(
-                        _(
-                            "You can only manage documents on project records where you are the project responsible."
-                        )
-                    )
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        self._check_project_user_documents_guard(vals_list=vals_list)
-        return super().create(vals_list)
+    # --- INDISPENSABLE EN ODOO 18 PARA ARRASTRAR ---
+    def _check_access(self, operation):
+        if self.env.user.has_group("project.group_project_user"):
+            return # Permite la navegación y el movimiento visual
+        return super(DocumentsDocument, self)._check_access(operation)
 
     def write(self, vals):
-        if self._is_project_user_restricted():
-            user = self.env.user
-            for record in self:
-                model_name, res_id = self._get_target_model_res_id_from_vals(vals, record=record)
-                if model_name in self._PROJECT_GUARDED_MODELS and not self._can_manage_project_related_record(
-                    model_name, res_id, user
-                ):
-                    raise AccessError(
-                        _(
-                            "You can only manage documents on project records where you are the project responsible."
-                        )
-                    )
-        return super().write(vals)
+        # 1. Si es Admin o Manager, no hacemos nada y dejamos pasar
+        if not self._is_project_user_restricted():
+            return super(DocumentsDocument, self).write(vals)
+
+        user = self.env.user
+        # 2. Separamos: lo que creó el PM vs lo que no
+        my_records = self.filtered(lambda r: r.owner_id == user)
+        others_records = self - my_records
+
+        # 3. LO QUE ES MÍO: Lo muevo con sudo() para que Odoo me deje 'entrar' en carpetas ajenas
+        if my_records:
+            super(DocumentsDocument, my_records.sudo()).write(vals)
+
+        # 4. LO QUE NO ES MÍO: Bloqueo si intenta moverlo o renombrarlo
+        if others_records:
+            fields_to_block = ['parent_id', 'folder_id', 'name', 'owner_id']
+            if any(f in vals for f in fields_to_block):
+                raise AccessError(_("No tienes permisos para mover o modificar documentos de otros usuarios."))
+            
+            # Si solo cambia etiquetas, permitimos
+            super(DocumentsDocument, others_records).write(vals)
+        
+        return True
 
     def unlink(self):
-        self._check_project_user_documents_guard(records=self)
-        return super().unlink()
+        if self._is_project_user_restricted():
+            user = self.env.user
+            if any(record.owner_id != user for record in self):
+                raise AccessError(_("No puedes eliminar documentos de otros usuarios."))
+        return super(DocumentsDocument, self).unlink()
 
 
 class MailMessage(models.Model):
@@ -286,3 +240,5 @@ class MailActivity(models.Model):
             vals_list.append(candidate)
         self._check_documents_activity_guard(vals_list)
         return super().write(vals)
+
+
