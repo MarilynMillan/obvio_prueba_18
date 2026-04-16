@@ -6,6 +6,11 @@
     'data': [
         'views/mail_message_views.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'obvio_tracking/static/src/css/tracking.css',
+        ],
+    },
     'installable': True,
     'application': False,
     'auto_install': False,
