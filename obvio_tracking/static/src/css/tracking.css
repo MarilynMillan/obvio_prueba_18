@@ -1,0 +1,5 @@
+
+/* Ocultar el botón de editar (los 3 puntitos) para mensajes eliminados o actividades canceladas */
+.o-mail-Message:has(.is_deleted_message) .o-mail-Message-actions {
+    display: none !important;
+}

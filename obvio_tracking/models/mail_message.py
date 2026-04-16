@@ -7,7 +7,7 @@ import pytz
 class MailMessage(models.Model):
     _inherit = 'mail.message'
 
-   def unlink(self):
+    def unlink(self):
         """ Borrado lógico: Cambia el cuerpo y evita el borrado físico """
         task_messages = self.filtered(lambda r: r.model == 'project.task')
         other_messages = self - task_messages
@@ -38,7 +38,7 @@ class MailMessage(models.Model):
         """ Trazabilidad de edición bloqueada si el mensaje ya fue eliminado """
         if 'body' in vals and vals.get('body') and not self._context.get('skip_tracking'):
             # MARCADO CRÍTICO: No puede ser un string vacío ""
-            marker = ""
+            marker = "<!-- EDIT_MARKER -->"
             
             for record in self:
                 if record.model != 'project.task' or not record.body:
@@ -46,8 +46,8 @@ class MailMessage(models.Model):
 
                 body_str = str(record.body)
                 
-                # BLOQUEO: Si el mensaje está borrado, no permitimos editar el body
-                if '🗑️' in body_str or 'is_deleted_message' in body_str:
+                # BLOQUEO: Si el mensaje está borrado o es una actividad cancelada, no permitimos editar el body
+                if '🗑️' in body_str or 'is_deleted_message' in body_str or '🗙' in body_str:
                     continue
 
                 new_content = str(vals.get('body', ''))
@@ -122,7 +122,7 @@ class MailActivity(models.Model):
 
                     self.env['mail.message'].create({
                         'body': f"""
-                            <div style="color: #666666; border-left: 3px solid #ccc; padding-left: 10px;">
+                            <div class="is_deleted_message" style="color: #666666; background: #f9f9f9; padding: 8px; border-radius: 4px; border-left: 3px solid #ccc; opacity: 0.7;">
                                 <small><i>🗙 Actividad cancelada por {self.env.user.name} el {current_time}</i></small>
                                 <br/><b>Asunto:</b> {activity.summary or activity.activity_type_id.name}
                                 <br/><span style="font-size: 0.9em;">Nota: {activity.note or 'Sin nota'}</span>
