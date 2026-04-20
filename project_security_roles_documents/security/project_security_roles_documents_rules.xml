@@ -22,5 +22,16 @@
             <field name="perm_unlink" eval="True"/>
             <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
         </record>
+
+        <record id="rule_ir_attachment_project_user_global_read" model="ir.rule">
+            <field name="name">Project Documents Attachments: Global Read for PMs</field>
+            <field name="model_id" ref="base.model_ir_attachment"/>
+            <field name="domain_force">[('res_model', '=', 'documents.document')]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('project.group_project_user'))]"/>
+        </record>
     </data>
 </odoo>
