@@ -112,14 +112,14 @@
         <function model="ir.rule" name="write">
             <value model="ir.rule" search="[('id', '=', ref('project.report_project_task_user_rule'))]"/>
             <value eval="{
-                'domain_force': &quot;['|', '|', '|', ('project_id.user_id', '=', user.id), ('user_ids', 'in', user.id), ('project_id.message_partner_ids', 'in', [user.partner_id.id]), ('project_id.collaborator_ids.partner_id', '=', user.partner_id.id)]&quot;
+                'domain_force': &quot;['|', ('project_id.user_id', '=', user.id), ('user_ids', 'in', user.id)]&quot;
             }"/>
         </function>
 
         <function model="ir.rule" name="write">
             <value model="ir.rule" search="[('id', '=', ref('project.burndown_chart_project_user_rule'))]"/>
             <value eval="{
-                'domain_force': &quot;['|', '|', '|', ('project_id.user_id', '=', user.id), ('user_ids', 'in', user.id), ('project_id.message_partner_ids', 'in', [user.partner_id.id]), ('project_id.collaborator_ids.partner_id', '=', user.partner_id.id)]&quot;
+                'domain_force': &quot;['|', ('project_id.user_id', '=', user.id), ('user_ids', 'in', user.id)]&quot;
             }"/>
         </function>
 
@@ -210,7 +210,7 @@
         <record id="rule_project_update_user_follower_read" model="ir.rule">
             <field name="name">Follower Project Updates Read</field>
             <field name="model_id" ref="project.model_project_update"/>
-            <field name="domain_force">[('project_id.message_partner_ids', 'in', [user.partner_id.id])]</field>
+            <field name="domain_force">[(0, '=', 1)]</field>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="False"/>
@@ -221,7 +221,7 @@
         <record id="rule_project_update_user_team_read" model="ir.rule">
             <field name="name">Team Project Updates Read</field>
             <field name="model_id" ref="project.model_project_update"/>
-            <field name="domain_force">[('project_id.collaborator_ids.partner_id', '=', user.partner_id.id)]</field>
+            <field name="domain_force">[(0, '=', 1)]</field>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="False"/>
