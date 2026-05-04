@@ -244,3 +244,22 @@ msgstr "Adjuntar PDF Bancario"
 #: model:ir.model.fields,field_description:obvio.field_res_partner_bank__pdf_filename
 msgid "Attach Bank PDF"
 msgstr "Nombre del Adjunto"
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_project__is_subproject
+msgid "Main Project"
+msgstr "Proyecto Principal"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_project__use_suffix
+msgid "Subproject"
+msgstr "Subproyecto"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_project__parent_project_id
+msgid "Subproject Suffix"
+msgstr "Subproyecto Sufijo"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_project__subproject_suffix
+msgid "Suffix"
+msgstr "Sufijo"
