@@ -66,10 +66,10 @@ class ProjectProject(models.Model):
         ('3', 'Very High'),
     ], string="Prioridad")
 
-    is_subproject = fields.Boolean(string='Is a Sub-project',tracking=True ,default=False)
-    parent_project_id = fields.Many2one('project.project', string='Sub Project', domain=[('is_subproject', '=', True)])
-    subproject_suffix = fields.Char(string='fixed sub',tracking=True, size=2)
-    use_suffix = fields.Boolean(string='Use Suffix', default=False, tracking=True)
+    is_subproject = fields.Boolean(string='Main Project',tracking=True ,default=False)
+    parent_project_id = fields.Many2one('project.project', string='Subproject Suffix', domain=[('is_subproject', '=', True)])
+    subproject_suffix = fields.Char(string='Suffix',tracking=True, size=2)
+    use_suffix = fields.Boolean(string='Subproject', default=False, tracking=True)
 
     completion_date = fields.Date(string="Completion Date")
     is_manager_custom = fields.Boolean(compute='_compute_is_manager_custom')
@@ -81,6 +81,21 @@ class ProjectProject(models.Model):
             reg.is_manager_custom = is_manager
 
             
+
+    @api.onchange('parent_project_id')
+    def _onchange_parent_project_id(self):
+        if self.use_suffix and self.parent_project_id:
+            parent = self.parent_project_id
+            self.partner_id = parent.partner_id
+            self.type_project = parent.type_project
+            self.zona_id = parent.zona_id
+            self.partner_operator_id = parent.partner_operator_id
+            self.ubication_id = parent.ubication_id
+            self.tienda_id = parent.tienda_id
+            self.name_copy = parent.name_copy
+            self.date_start = parent.date_start
+            self.date = parent.date
+            self.completion_date = parent.completion_date
 
     @api.onchange('template_project_id')
     def _onchange_template_project_id(self):
@@ -290,6 +305,19 @@ class ProjectProject(models.Model):
             elif use_suffix and parent_id:
                 parent = self.env['project.project'].browse(parent_id)
                 suffix = vals.get('subproject_suffix', '').strip().upper()
+
+                # Ensure missing fields fall back to parent if not provided in vals
+                if 'type_project' not in vals and parent.type_project: vals['type_project'] = parent.type_project.id
+                if 'partner_id' not in vals and parent.partner_id: vals['partner_id'] = parent.partner_id.id
+                if 'zona_id' not in vals and parent.zona_id: vals['zona_id'] = parent.zona_id.id
+                if 'partner_operator_id' not in vals and parent.partner_operator_id: vals['partner_operator_id'] = parent.partner_operator_id.id
+                if 'ubication_id' not in vals and parent.ubication_id: vals['ubication_id'] = parent.ubication_id.id
+                if 'tienda_id' not in vals and parent.tienda_id: vals['tienda_id'] = parent.tienda_id.id
+                if 'name_copy' not in vals and parent.name_copy: vals['name_copy'] = parent.name_copy
+                if 'date_start' not in vals and parent.date_start: vals['date_start'] = parent.date_start
+                if 'date' not in vals and parent.date: vals['date'] = parent.date
+                if 'completion_date' not in vals and parent.completion_date: vals['completion_date'] = parent.completion_date
+
                 if parent.sequence_new and parent.sequence_new != 'TEMPLATE':
                     base_seq = parent.sequence_new
                     parts = base_seq.split(' ')

@@ -327,3 +327,22 @@ msgstr "Verwaltet die Projektländer."
 #: model:ir.model.fields,field_description:obvio.field_res_partner_bank__pdf_attachment
 msgid "Attach bank PDF"
 msgstr "Bank-PDF anhängen"
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_project__is_subproject
+msgid "Main Project"
+msgstr "Hauptprojekt"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_project__use_suffix
+msgid "Subproject"
+msgstr "Teilprojekt"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_project__parent_project_id
+msgid "Subproject Suffix"
+msgstr "Teilprojekt Suffix"
+
+#. module: obvio
+#: model:ir.model.fields,field_description:obvio.field_project_project__subproject_suffix
+msgid "Suffix"
+msgstr "Suffix"
