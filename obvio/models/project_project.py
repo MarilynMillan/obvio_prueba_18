@@ -72,6 +72,15 @@ class ProjectProject(models.Model):
     use_suffix = fields.Boolean(string='Use Suffix', default=False, tracking=True)
 
     completion_date = fields.Date(string="Completion Date")
+    is_manager_custom = fields.Boolean(compute='_compute_is_manager_custom')
+
+    def _compute_is_manager_custom(self):
+        # Verificamos si es Admin (UID 1) o si tiene el grupo de Manager
+        is_manager = self.env.user.has_group('project.group_project_manager') or self.env.uid == 1
+        for reg in self:
+            reg.is_manager_custom = is_manager
+
+            
 
     @api.onchange('template_project_id')
     def _onchange_template_project_id(self):
@@ -272,50 +281,40 @@ class ProjectProject(models.Model):
             if is_template:
                 vals.update({
                     'sequence_new': 'TEMPLATE',
-                    'account_id': False,
+                    'account_id': False,  # Intento preventivo
                     'use_documents': False,
                     'documents_folder_id': False
                 })
 
-            # --- 3. DETERMINAR EL CORRELATIVO (REUTILIZACIÓN VS GENERACIÓN) ---
-            # Prioridad 1: Reutilizar correlativo de un padre existente (P-3470 -> P-3470 B)
+            # --- 3. DETERMINAR EL CORRELATIVO ---
             elif use_suffix and parent_id:
                 parent = self.env['project.project'].browse(parent_id)
                 suffix = vals.get('subproject_suffix', '').strip().upper()
-                
                 if parent.sequence_new and parent.sequence_new != 'TEMPLATE':
                     base_seq = parent.sequence_new
                     parts = base_seq.split(' ')
-                    # Limpiamos sufijos previos (ej: de "P-3470 A" extraemos "P-3470")
                     if parts and parts[-1].isalpha() and len(parts[-1]) <= 2:
                         base_seq = ' '.join(parts[:-1])
-                    
-                    # Asignamos la base del padre + nuevo sufijo (NO genera número nuevo)
                     vals['sequence_new'] = f"{base_seq} {suffix}" if suffix else base_seq
                 else:
-                    # Fallback si el padre no tiene secuencia (por si acaso)
                     vals['sequence_new'] = self.env['ir.sequence'].next_by_code('project.project') or ''
 
-            # Prioridad 2: Es un Sub-proyecto BASE (Genera número nuevo + " A")
             elif is_sub and not use_suffix:
                 seq = self.env['ir.sequence'].next_by_code('project.project') or ''
                 vals['sequence_new'] = f"{seq} A" if seq else ''
 
-            # Prioridad 3: Proyecto Normal (Genera número nuevo estándar)
             else:
                 if not vals.get('sequence_new') or vals.get('sequence_new') in ['New', '/', False]:
                     seq = self.env['ir.sequence'].next_by_code('project.project')
                     vals['sequence_new'] = seq if seq else ''
 
-            # --- 4. NOMENCLATURA (INDEPENDIENTE DE DATOS) ---
-            # Limpiamos el nombre corto (Short Name)
+            # --- 4. NOMENCLATURA ---
             p_short = (vals.get('name_copy') or vals.get('name') or '').replace('TEMPLATE - ', '').strip()
             if p_short == "/": p_short = ""
             vals['name_copy'] = p_short
             vals['original_name'] = p_short
 
             if not is_template:
-                # Buscamos alias de los datos actuales del formulario (Independencia total)
                 t_alias = self.env['type.project'].browse(vals.get('type_project')).alias_name or ''
                 partner_alias = self.env['res.partner'].browse(vals.get('partner_id')).alias_name or ''
                 op_code = self.env['res.partner'].browse(vals.get('partner_operator_id')).codigo_operator or ''
@@ -323,30 +322,42 @@ class ProjectProject(models.Model):
                 t_name = self.env['zone.tienda'].browse(vals.get('tienda_id')).tienda or ''
                 u_name = self.env['zone.ubication'].browse(vals.get('ubication_id')).zone or ''
 
-                # Construcción del nombre final concatenando todas las partes
                 display_seq = vals.get('sequence_new', '')
                 name_parts = [p for p in [display_seq, t_alias, partner_alias, p_short, op_code, t_name, u_name, z_code] if p]
                 vals['name'] = " - ".join(name_parts) if name_parts else p_short
             else:
-                # Formato rígido para plantillas
                 vals['name'] = f"TEMPLATE - {p_short}" if p_short else "TEMPLATE"
 
-        # --- 5. CREACIÓN FÍSICA ---
+        # --- 5. CREACIÓN FÍSICA (Aquí Odoo suele forzar la cuenta) ---
         projects = super(ProjectProject, self).create(vals_list)
 
-        # --- 6. POST-CREACIÓN (Tareas y Cuenta Analítica) ---
+        # --- 6. POST-CREACIÓN (Limpieza Radical) ---
         for vals, project in zip(vals_list, projects):
             if project.is_template:
+                # Si Odoo creó una cuenta analítica a pesar de los vals, la eliminamos
+                if project.account_id:
+                    analytic_account = project.account_id
+                    # 1. Desvinculamos la cuenta del proyecto
+                    project.write({'account_id': False})
+                    # 2. Eliminamos la cuenta física de la base de datos
+                    # Usamos sudo() por si el usuario no tiene permisos contables
+                    analytic_account.sudo().unlink()
+                
+                # Aseguramos otros campos de plantilla
+                project.write({
+                    'use_documents': False,
+                    'documents_folder_id': False
+                })
                 continue 
 
+            # Actualizar nombre de cuenta analítica (solo para proyectos reales)
             if project.account_id:
                 project.account_id.name = project.name
 
-            # Si se seleccionó una plantilla, copiamos las tareas al responsable del proyecto
+            # Copia de tareas desde la plantilla elegida
             if vals.get('template_project_id'):
                 template = self.env['project.project'].browse(vals['template_project_id'])
                 project_user_ids = [(6, 0, [project.user_id.id])] if project.user_id else False
-                
                 if template:
                     for task in template.task_ids:
                         task.with_context(copy_project=True).copy({
@@ -448,8 +459,99 @@ class ProjectProject(models.Model):
     def unlink(self):
         return super(ProjectProject, self.with_context(is_unlinking_parent=True)).unlink()
 
+    """def write(self, vals):
+        protected_fields = [
+            'operation', 'zona_id', 'ubication_id', 'tienda_id', 
+            'type_project', 'partner_id', 'partner_operator_id'
+        ]
+        
+        # 1. SEGURIDAD Y PRE-VALS
+        if vals.get('is_template'):
+            vals.update({
+                'account_id': False, 
+                'sequence_new': 'TEMPLATE',
+                'use_documents': False,
+                'documents_folder_id': False
+            })
 
-    def write(self, vals):
+        # Capturamos el estado antes del cambio
+        before_data = {p.id: p.is_template for p in self}
+
+        # 2. GUARDADO BASE
+        res = super(ProjectProject, self).write(vals)
+
+        # 3. POST-PROCESO DE TRANSICIÓN
+        for project in self:
+            was_template = before_data.get(project.id)
+            is_now_template = project.is_template
+
+            # --- CASO A: PASA DE PROYECTO A PLANTILLA (Limpiar) ---
+            if is_now_template and not was_template:
+                if project.account_id:
+                    acc = project.account_id
+                    super(ProjectProject, project).write({'account_id': False})
+                    acc.sudo().unlink()
+                continue
+
+            # --- CASO B: PASA DE PLANTILLA A PROYECTO REAL (Activar y Renombrar) ---
+            if was_template and not is_now_template:
+                # 1. Generar Correlativo Real (porque antes decía 'TEMPLATE')
+                new_seq = self.env['ir.sequence'].next_by_code('project.project') or ''
+                
+                # Manejo de sufijo si es subproyecto
+                if project.is_subproject:
+                    new_seq = f"{new_seq} A"
+                
+                # 2. Crear Cuenta Analítica
+                analytic_vals = {
+                    'name': project.name, # Se actualizará abajo
+                    'company_id': project.company_id.id,
+                    'partner_id': project.partner_id.id,
+                }
+                new_acc = self.env['account.analytic.account'].sudo().create(analytic_vals)
+                
+                # 3. Actualizar flags básicos
+                super(ProjectProject, project).write({
+                    'sequence_new': new_seq,
+                    'account_id': new_acc.id,
+                    'use_documents': True
+                })
+
+            # --- 4. RECALCULO DE NOMENCLATURA (Para todos los casos de cambio) ---
+            campos_nom = [
+                'type_project', 'partner_id', 'partner_operator_id', 'zona_id',
+                'tienda_id', 'ubication_id', 'name_copy', 'is_subproject',
+                'parent_project_id', 'subproject_suffix', 'use_suffix', 'is_template'
+            ]
+
+            if any(campo in vals for campo in campos_nom) or (was_template and not is_now_template):
+                p_short = (project.name_copy or '').replace('TEMPLATE - ', '').strip()
+                if p_short == "/": p_short = ""
+                
+                if project.is_template:
+                    final_name = f"TEMPLATE - {p_short}" if p_short else "TEMPLATE"
+                    super(ProjectProject, project).write({'name': final_name, 'sequence_new': 'TEMPLATE'})
+                else:
+                    # Construcción de nombre real con los alias
+                    t_alias = project.type_project.alias_name or ''
+                    part_alias = project.partner_id.alias_name or ''
+                    op = project.partner_operator_id.codigo_operator or ''
+                    z = project.zona_id.code or ''
+                    t = project.tienda_id.tienda or ''
+                    u = project.ubication_id.zone or ''
+                    display_seq = project.sequence_new if project.sequence_new != 'TEMPLATE' else ''
+
+                    parts = [p for p in [display_seq, t_alias, part_alias, p_short, op, t, u, z] if p]
+                    final_name = " - ".join(parts) if parts else p_short
+
+                    if project.name != final_name:
+                        super(ProjectProject, project).write({'name': final_name})
+                        if project.account_id:
+                            project.account_id.sudo().write({'name': final_name})
+
+        return res"""
+
+    """def write(self, vals):
         protected_fields = [
             'operation', 'zona_id', 'ubication_id', 'tienda_id', 
             'type_project', 'partner_id', 'partner_operator_id'
@@ -563,6 +665,153 @@ class ProjectProject(models.Model):
                     super(ProjectProject, project).write({'name': final_name, 'sequence_new': seq})
                     if project.account_id:
                         project.account_id.name = final_name
+        return res"""
+
+
+    def write(self, vals):
+        protected_fields = [
+            'operation', 'zona_id', 'ubication_id', 'tienda_id', 
+            'type_project', 'partner_id', 'partner_operator_id'
+        ]
+        
+        # 1. SEGURIDAD: Solo Manager o Responsable pueden editar campos críticos
+        if not self.env.user.has_group('project.group_project_manager'):
+            current_user = self.env.user
+            for project in self:
+                if (not project.is_template and 
+                    any(f in vals for f in protected_fields) and 
+                    project.user_id != current_user):
+                    raise UserError(_("No puedes modificar campos críticos en un proyecto activo. Contacta a un Manager."))
+
+        # 2. PRE-PROCESO: Si se marca como plantilla ahora (Limpieza preventiva)
+        if vals.get('is_template'):
+            vals.update({
+                'account_id': False,
+                'sequence_new': 'TEMPLATE',
+                'use_documents': False,
+                'documents_folder_id': False
+            })
+
+        # Capturamos el estado anterior para detectar el cambio "Plantilla -> Real"
+        template_status_before = {p.id: p.is_template for p in self}
+
+        # 3. GUARDADO BASE
+        res = super(ProjectProject, self).write(vals)
+
+        # 4. CARGA DE TAREAS (Si se añade o cambia la plantilla elegida)
+        if vals.get('template_project_id'):
+            for project in self:
+                if project.is_template:
+                    continue
+                template = self.env['project.project'].browse(vals['template_project_id'])
+                if template:
+                    project.task_ids.unlink() # Limpiar tareas existentes
+                    project_user_ids = [(6, 0, [project.user_id.id])] if project.user_id else False
+                    for task in template.task_ids:
+                        task.with_context(copy_project=True).copy({
+                            'project_id': project.id,
+                            'name': task.name,
+                            'stage_id': task.stage_id.id,
+                            'sequence': task.sequence,
+                            'tag_ids': [(6, 0, task.tag_ids.ids)],
+                            'user_ids': project_user_ids,
+                        })
+
+        # 5. POST-PROCESO: Limpieza Radical o Regeneración por Reversa
+        campos_nom = [
+            'type_project', 'partner_id', 'partner_operator_id', 'zona_id',
+            'tienda_id', 'ubication_id', 'name_copy', 'is_subproject',
+            'parent_project_id', 'subproject_suffix', 'use_suffix', 'is_template'
+        ]
+
+        for project in self:
+            was_template = template_status_before.get(project.id)
+            is_now_template = project.is_template
+
+            # --- CASO A: PASÓ A SER PLANTILLA (Eliminar cuenta física) ---
+            if is_now_template:
+                if project.account_id:
+                    acc = project.account_id
+                    super(ProjectProject, project).write({'account_id': False})
+                    acc.sudo().unlink()
+                
+                # Sincronizar nombre de plantilla inmediatamente
+                p_short = (project.name_copy or '').replace('TEMPLATE - ', '').strip()
+                new_name = f"TEMPLATE - {p_short}" if p_short else "TEMPLATE"
+                if project.name != new_name:
+                    super(ProjectProject, project).write({'name': new_name, 'sequence_new': 'TEMPLATE'})
+                continue 
+
+            # --- CASO B: REVERSA (De Plantilla a Proyecto Real) ---
+            if was_template and not is_now_template:
+                # 1. Generar secuencia real (Siguiente correlativo)
+                new_seq = self.env['ir.sequence'].next_by_code('project.project') or ''
+                if project.is_subproject and not project.use_suffix:
+                    new_seq = f"{new_seq} A"
+                
+                # 2. Buscar Plan Analítico (OBLIGATORIO para evitar el error 'Field: Plan')
+                plan = self.env['account.analytic.plan'].sudo().search([], limit=1)
+                
+                # 3. Crear cuenta analítica con plan_id
+                analytic_vals = {
+                    'name': project.name,
+                    'company_id': project.company_id.id,
+                    'partner_id': project.partner_id.id,
+                    'plan_id': plan.id if plan else False,
+                }
+                new_acc = self.env['account.analytic.account'].sudo().create(analytic_vals)
+                
+                # Actualizamos flags de proyecto real
+                super(ProjectProject, project).write({
+                    'sequence_new': new_seq,
+                    'account_id': new_acc.id,
+                    'use_documents': True
+                })
+
+            # --- 6. NOMENCLATURA: (Tu lógica original de subproyectos y alias) ---
+            if any(campo in vals for campo in campos_nom) or (was_template and not is_now_template):
+                seq = project.sequence_new
+                
+                # Lógica de sufijos para subproyectos heredada
+                if project.is_subproject:
+                    if project.use_suffix and project.parent_project_id:
+                        parent_seq = project.parent_project_id.sequence_new
+                        suffix = (project.subproject_suffix or '').strip().upper()
+                        if parent_seq and parent_seq != 'TEMPLATE':
+                            base_seq = parent_seq
+                            parts_seq = base_seq.split(' ')
+                            if parts_seq and parts_seq[-1].isalpha() and len(parts_seq[-1]) <= 2:
+                                base_seq = ' '.join(parts_seq[:-1])
+                            seq = f"{base_seq} {suffix}" if suffix else base_seq
+                    elif not project.use_suffix and seq and seq != 'TEMPLATE':
+                        parts_seq = seq.split(' ')
+                        if not (parts_seq and parts_seq[-1].isalpha()):
+                            seq = f"{seq} A"
+
+                # Construcción del nombre final con Alias e Independencia
+                p_short = (project.name_copy or '').replace('TEMPLATE - ', '').strip()
+                if p_short == "/": p_short = ""
+                
+                t_alias = project.type_project.alias_name or ''
+                part_alias = project.partner_id.alias_name or ''
+                op = project.partner_operator_id.codigo_operator or ''
+                z = project.zona_id.code or ''
+                t = project.tienda_id.tienda or ''
+                u = project.ubication_id.zone or ''
+
+                display_seq = seq if seq and seq != '/' else ''
+                parts = [p for p in [display_seq, t_alias, part_alias, p_short, op, t, u, z] if p]
+                final_name = " - ".join(parts) if parts else p_short
+
+                # Actualización final de nombre y cuenta
+                if project.name != final_name or project.sequence_new != seq:
+                    super(ProjectProject, project).write({
+                        'name': final_name, 
+                        'sequence_new': seq
+                    })
+                    if project.account_id:
+                        project.account_id.sudo().write({'name': final_name})
+                        
         return res
 
 
